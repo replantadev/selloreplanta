@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sello Replanta
  * Description: Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta.
- * Version: 1.0.3
+ * Version: 1.0.4
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -144,7 +144,7 @@ function sello_replanta_inline_styles()
             text-align: center;
             padding: 15px 0;
             position: relative;
-            z-index: 9999;
+            
         }
         .sello-replanta-img {
             width: 110px;
@@ -180,7 +180,7 @@ function sello_replanta_display_badge()
                 </div>
               </div>';
 
-        // JavaScript para mover el div al final del footer
+        // JavaScript para mover el div al final del footer y aplicar el color de fondo
         echo '<script>
             document.addEventListener("DOMContentLoaded", function() {
                 var selloContainer = document.getElementById("sello-replanta-container");
@@ -188,6 +188,14 @@ function sello_replanta_display_badge()
                 if (selloContainer && footer) {
                     footer.appendChild(selloContainer); // Insertar como último hijo del footer
                     selloContainer.style.display = "block";
+
+                    // Obtener el color de fondo del elemento anterior al footer
+                    var previousElement = footer.previousElementSibling;
+                    if (previousElement) {
+                        var computedStyle = window.getComputedStyle(previousElement);
+                        var backgroundColor = computedStyle.backgroundColor;
+                        selloContainer.style.backgroundColor = backgroundColor; // Aplicar el color de fondo
+                    }
                 }
             });
         </script>';
