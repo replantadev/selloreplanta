@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sello Replanta
  * Description: Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta.
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -171,19 +171,26 @@ function sello_replanta_display_badge()
         $image_url = plugin_dir_url(__FILE__) . 'imagenes/' . $image_file;
         $domain = parse_url(home_url(), PHP_URL_HOST);
 
-        echo '<div class="sello-replanta-footer">';
-        echo '<a href="https://replanta.net/web-hosting-ecologico/?dominio=' . esc_attr($domain) . '" target="_blank" rel="noopener">';
-        echo '<img src="' . esc_url($image_url) . '" alt="Alojamiento web ecológico" class="sello-replanta-img">';
-        echo '</a></div>';
-        echo '<script type="application/ld+json">
-                {
-                    "@context": "https://schema.org",
-                    "@type": "Organization",
-                    "url": "https://replanta.net",
-                    "logo": "' . esc_url($image_url) . '",
-                    "description": "Hosting web ecológico y sostenible"
+        // Generar el div del sello
+        echo '<div id="sello-replanta-container" style="display:none;">
+                <div class="sello-replanta-footer">
+                    <a href="https://replanta.net/web-hosting-ecologico/?dominio=' . esc_attr($domain) . '" target="_blank" rel="noopener">
+                        <img src="' . esc_url($image_url) . '" alt="Alojamiento web ecológico" class="sello-replanta-img">
+                    </a>
+                </div>
+              </div>';
+
+        // JavaScript para mover el div antes del cierre del footer
+        echo '<script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var selloContainer = document.getElementById("sello-replanta-container");
+                var footer = document.querySelector("footer");
+                if (selloContainer && footer) {
+                    footer.parentNode.insertBefore(selloContainer, footer);
+                    selloContainer.style.display = "block";
                 }
-                </script>';
+            });
+        </script>';
     }
 }
 ?>
