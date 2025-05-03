@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sello Replanta
  * Description: Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta.
- * Version: 1.0.5
+ * Version: 1.0.6
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -72,11 +72,16 @@ function sello_replanta_options_page()
 // Registrar configuraciones
 add_action('admin_init', 'sello_replanta_settings');
 
+
+// Registrar configuraciones
+add_action('admin_init', 'sello_replanta_settings');
+
 function sello_replanta_settings()
 {
     register_setting('sello_replanta_options_group', 'sello_replanta_options', 'sello_replanta_options_validate');
     add_settings_section('sello_replanta_main', 'Configuración Principal', 'sello_replanta_section_text', 'sello-replanta');
     add_settings_field('sello_replanta_mode', 'Modo', 'sello_replanta_setting_mode', 'sello-replanta', 'sello_replanta_main');
+    add_settings_field('sello_replanta_bg_color', 'Color de Fondo', 'sello_replanta_setting_bg_color', 'sello-replanta', 'sello_replanta_main');
 }
 
 function sello_replanta_section_text()
@@ -94,10 +99,19 @@ function sello_replanta_setting_mode()
           </select>";
 }
 
+function sello_replanta_setting_bg_color()
+{
+    $options = get_option('sello_replanta_options');
+    $bg_color = isset($options['bg_color']) ? $options['bg_color'] : '';
+    echo "<input type='text' id='sello_replanta_bg_color' name='sello_replanta_options[bg_color]' value='" . esc_attr($bg_color) . "' placeholder='Ejemplo: #ffffff' />";
+    echo "<p class='description'>Deja este campo vacío para usar el color detectado automáticamente.</p>";
+}
+
 function sello_replanta_options_validate($input)
 {
     $newinput = array();
     $newinput['mode'] = trim($input['mode']);
+    $newinput['bg_color'] = sanitize_hex_color($input['bg_color']); // Validar color hexadecimal
     return $newinput;
 }
 
@@ -158,6 +172,7 @@ function sello_replanta_inline_styles()
 }
 
 // Reemplazar la función de enqueue scripts por esta
+
 add_action('wp_footer', 'sello_replanta_display_badge');
 
 function sello_replanta_display_badge()
@@ -165,6 +180,7 @@ function sello_replanta_display_badge()
     $is_hosted = get_option('sello_replanta_is_hosted', false);
     $options = get_option('sello_replanta_options');
     $mode = isset($options['mode']) ? $options['mode'] : 'light';
+    $custom_bg_color = isset($options['bg_color']) ? $options['bg_color'] : '';
 
     if ($is_hosted) {
         $image_file = ($mode === 'dark') ? 'carbon-negative-b.svg' : 'carbon-negative.svg';
@@ -180,36 +196,43 @@ function sello_replanta_display_badge()
                 </div>
               </div>';
 
-        // JavaScript para detectar el último elemento visible dentro del footer y aplicar el color de fondo
+        // JavaScript para manejar el color de fondo
         echo '<script>
             document.addEventListener("DOMContentLoaded", function() {
                 var selloContainer = document.getElementById("sello-replanta-container");
                 var footer = document.querySelector("footer");
                 if (selloContainer && footer) {
-                    // Detectar el último elemento visible dentro del footer
-                    var lastElement = Array.from(footer.children).reverse().find(function(el) {
-                        return window.getComputedStyle(el).display !== "none";
-                    });
+                    var customBgColor = "' . esc_js($custom_bg_color) . '";
 
-                    // Si no hay un último elemento visible, usar el footer como referencia
-                    if (!lastElement) {
-                        lastElement = footer;
-                    }
+                    if (customBgColor) {
+                        // Usar el color configurado por el usuario
+                        selloContainer.style.backgroundColor = customBgColor;
+                    } else {
+                        // Detectar el último elemento visible dentro del footer
+                        var lastElement = Array.from(footer.children).reverse().find(function(el) {
+                            return window.getComputedStyle(el).display !== "none";
+                        });
 
-                    // Obtener el color de fondo del último elemento visible
-                    var computedStyle = window.getComputedStyle(lastElement);
-                    var backgroundColor = computedStyle.backgroundColor;
-
-                    // Si el último elemento no tiene color de fondo explícito, buscar en sus hijos
-                    if (backgroundColor === "rgba(0, 0, 0, 0)" || backgroundColor === "transparent") {
-                        var child = lastElement.querySelector("*");
-                        if (child) {
-                            backgroundColor = window.getComputedStyle(child).backgroundColor;
+                        // Si no hay un último elemento visible, usar el footer como referencia
+                        if (!lastElement) {
+                            lastElement = footer;
                         }
-                    }
 
-                    // Aplicar el color de fondo al contenedor del sello
-                    selloContainer.style.backgroundColor = backgroundColor;
+                        // Obtener el color de fondo del último elemento visible
+                        var computedStyle = window.getComputedStyle(lastElement);
+                        var backgroundColor = computedStyle.backgroundColor;
+
+                        // Si el último elemento no tiene color de fondo explícito, buscar en sus hijos
+                        if (backgroundColor === "rgba(0, 0, 0, 0)" || backgroundColor === "transparent") {
+                            var child = lastElement.querySelector("*");
+                            if (child) {
+                                backgroundColor = window.getComputedStyle(child).backgroundColor;
+                            }
+                        }
+
+                        // Aplicar el color de fondo detectado
+                        selloContainer.style.backgroundColor = backgroundColor;
+                    }
 
                     // Insertar el sello como último hijo del footer
                     footer.appendChild(selloContainer);
