@@ -2,13 +2,14 @@
 /**
  * Plugin Name: Sello Replanta
  * Description: Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: sello-replanta
  * Domain Path: /languages
+ * GitHub Plugin URI: https://github.com/replantadev/selloreplanta
  */
 // Evitar el acceso directo al archivo
 
