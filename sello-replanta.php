@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sello Replanta
  * Description: Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta.
- * Version: 1.0.7
+ * Version: 1.0.8
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -180,50 +180,7 @@ function sello_replanta_display_badge()
                 </div>
               </div>';
 
-        // JavaScript para manejar el color de fondo
-        echo '<script>
-            document.addEventListener("DOMContentLoaded", function() {
-                var selloContainer = document.getElementById("sello-replanta-container");
-                var footer = document.querySelector("footer");
-                if (selloContainer && footer) {
-                    var customBgColor = "' . esc_js($custom_bg_color) . '";
-
-                    if (customBgColor) {
-                        // Usar el color configurado por el usuario
-                        selloContainer.style.backgroundColor = customBgColor;
-                    } else {
-                        // Detectar el último elemento visible dentro del footer
-                        var lastElement = Array.from(footer.children).reverse().find(function(el) {
-                            return window.getComputedStyle(el).display !== "none";
-                        });
-
-                        // Si no hay un último elemento visible, usar el footer como referencia
-                        if (!lastElement) {
-                            lastElement = footer;
-                        }
-
-                        // Obtener el color de fondo del último elemento visible
-                        var computedStyle = window.getComputedStyle(lastElement);
-                        var backgroundColor = computedStyle.backgroundColor;
-
-                        // Si el último elemento no tiene color de fondo explícito, buscar en sus hijos
-                        if (backgroundColor === "rgba(0, 0, 0, 0)" || backgroundColor === "transparent") {
-                            var child = lastElement.querySelector("*");
-                            if (child) {
-                                backgroundColor = window.getComputedStyle(child).backgroundColor;
-                            }
-                        }
-
-                        // Aplicar el color de fondo detectado
-                        selloContainer.style.backgroundColor = backgroundColor;
-                    }
-
-                    // Insertar el sello como último hijo del footer
-                    footer.appendChild(selloContainer);
-                    selloContainer.style.display = "block";
-                }
-            });
-        </script>';
+      
     }
 }
 ?>
