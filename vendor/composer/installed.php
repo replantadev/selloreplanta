@@ -1,20 +1,20 @@
 <?php return array(
     'root' => array(
-        'name' => '__root__',
+        'name' => 'replantadev/sello-replanta',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '15d0cdef29ac660955000a7da7907a2a3280338d',
-        'type' => 'library',
+        'reference' => '18e3368b9e51711da4d9cd077d943e709490fd43',
+        'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
         'dev' => true,
     ),
     'versions' => array(
-        '__root__' => array(
+        'replantadev/sello-replanta' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '15d0cdef29ac660955000a7da7907a2a3280338d',
-            'type' => 'library',
+            'reference' => '18e3368b9e51711da4d9cd077d943e709490fd43',
+            'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
             'dev_requirement' => false,

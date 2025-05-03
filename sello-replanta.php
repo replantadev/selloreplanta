@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sello Replanta
  * Description: Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta.
- * Version: 1.0.8
+ * Version: 1.0.10
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -11,11 +11,12 @@
  * Domain Path: /languages
  * GitHub Plugin URI: https://github.com/replantadev/selloreplanta
  */
-// Evitar el acceso directo al archivo
 
+// Evitar el acceso directo al archivo
 if (!defined('ABSPATH')) {
     exit;
 }
+
 define('SR_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('SR_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -42,7 +43,7 @@ function sello_replanta_menu()
 // Crear la página de opciones
 function sello_replanta_options_page()
 {
-    $domain = parse_url(home_url(), PHP_URL_HOST);
+    $domain = wp_parse_url(home_url(), PHP_URL_HOST);
     $is_hosted = get_option('sello_replanta_is_hosted', null);
 
     if (is_null($is_hosted)) {
@@ -69,13 +70,34 @@ function sello_replanta_options_page()
 <?php
 }
 
-add_action('wp_enqueue_scripts', 'sello_replanta_enqueue_scripts');
+add_action('plugins_loaded', 'sello_replanta_load_textdomain');
 
-function sello_replanta_enqueue_scripts()
+function sello_replanta_load_textdomain() {
+    load_plugin_textdomain('sello-replanta', false, dirname(plugin_basename(__FILE__)) . '/languages/');
+}
+
+add_action('wp_enqueue_scripts', 'sello_replanta_enqueue_assets');
+
+function sello_replanta_enqueue_assets()
 {
-    wp_enqueue_style('sello-replanta-styles', plugin_dir_url(__FILE__) . 'assets/css/sello-replanta.css', array(), '1.0.6');
+    // Registrar y cargar el CSS
+    wp_enqueue_style(
+        'sello-replanta-styles',
+        plugin_dir_url(__FILE__) . 'assets/css/sello-replanta.css',
+        array(),
+        '1.0.8'
+    );
 
-    wp_enqueue_script('sello-replanta-scripts', plugin_dir_url(__FILE__) . 'assets/js/sello-replanta.js', array('jquery'), '1.0.6', true);
+    // Registrar y cargar el JS
+    wp_enqueue_script(
+        'sello-replanta-scripts',
+        plugin_dir_url(__FILE__) . 'assets/js/sello-replanta.js',
+        array('jquery'),
+        '1.0.8',
+        true
+    );
+
+    // Pasar datos al script JS
     wp_localize_script('sello-replanta-scripts', 'selloReplantaData', array(
         'customBgColor' => isset(get_option('sello_replanta_options')['bg_color']) ? get_option('sello_replanta_options')['bg_color'] : '',
     ));
@@ -115,7 +137,6 @@ function sello_replanta_setting_bg_color()
     echo "<p class='description'>Deja este campo vacío para usar el color detectado automáticamente.</p>";
 }
 
-
 function sello_replanta_options_validate($input)
 {
     $newinput = array();
@@ -127,7 +148,9 @@ function sello_replanta_options_validate($input)
 // Función para verificar si el dominio está alojado en Replanta
 function verificar_dominio_replanta($domain)
 {
-    error_log('Verificando dominio: ' . $domain);
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        error_log('Verificando dominio: ' . $domain);
+    }
 
     $url = 'https://replanta.net/wp-json/replanta/v1/check_domain';
     $response = wp_remote_post($url, array(
@@ -138,7 +161,9 @@ function verificar_dominio_replanta($domain)
     ));
 
     if (is_wp_error($response)) {
-        error_log('Error en la solicitud: ' . $response->get_error_message());
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Error en la solicitud: ' . $response->get_error_message());
+        }
         return false;
     }
 
@@ -147,15 +172,16 @@ function verificar_dominio_replanta($domain)
 
     $is_hosted = isset($data['hosted']) && $data['hosted'] === true;
 
-    if ($is_hosted) {
-        error_log('Dominio alojado en Replanta.');
-    } else {
-        error_log('Dominio no alojado en Replanta.');
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        if ($is_hosted) {
+            error_log('Dominio alojado en Replanta.');
+        } else {
+            error_log('Dominio no alojado en Replanta.');
+        }
     }
 
     return $is_hosted;
 }
-
 
 add_action('wp_footer', 'sello_replanta_display_badge');
 
@@ -169,7 +195,7 @@ function sello_replanta_display_badge()
     if ($is_hosted) {
         $image_file = ($mode === 'dark') ? 'carbon-negative-b.svg' : 'carbon-negative.svg';
         $image_url = plugin_dir_url(__FILE__) . 'imagenes/' . $image_file;
-        $domain = parse_url(home_url(), PHP_URL_HOST);
+        $domain = wp_parse_url(home_url(), PHP_URL_HOST);
 
         // Generar el div del sello
         echo '<div id="sello-replanta-container" style="display:none;">
@@ -179,8 +205,5 @@ function sello_replanta_display_badge()
                     </a>
                 </div>
               </div>';
-
-      
     }
 }
-?>
