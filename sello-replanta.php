@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sello Replanta
  * Description: Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta.
- * Version: 1.0.2
+ * Version: 1.0.3
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -180,13 +180,13 @@ function sello_replanta_display_badge()
                 </div>
               </div>';
 
-        // JavaScript para mover el div antes del cierre del footer
+        // JavaScript para mover el div al final del footer
         echo '<script>
             document.addEventListener("DOMContentLoaded", function() {
                 var selloContainer = document.getElementById("sello-replanta-container");
                 var footer = document.querySelector("footer");
                 if (selloContainer && footer) {
-                    footer.parentNode.insertBefore(selloContainer, footer);
+                    footer.appendChild(selloContainer); // Insertar como último hijo del footer
                     selloContainer.style.display = "block";
                 }
             });
