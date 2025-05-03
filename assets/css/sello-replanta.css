@@ -1,0 +1,16 @@
+.sello-replanta-footer {
+    display: block !important;
+    text-align: center;
+    padding: 15px 0;
+    position: relative;
+}
+
+.sello-replanta-img {
+    width: 110px;
+    height: auto;
+    transition: opacity 0.3s ease;
+}
+
+.sello-replanta-img:hover {
+    opacity: 0.9;
+}

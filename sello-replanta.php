@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sello Replanta
  * Description: Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta.
- * Version: 1.0.6
+ * Version: 1.0.7
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -69,9 +69,17 @@ function sello_replanta_options_page()
 <?php
 }
 
-// Registrar configuraciones
-add_action('admin_init', 'sello_replanta_settings');
+add_action('wp_enqueue_scripts', 'sello_replanta_enqueue_scripts');
 
+function sello_replanta_enqueue_scripts()
+{
+    wp_enqueue_style('sello-replanta-styles', plugin_dir_url(__FILE__) . 'assets/css/sello-replanta.css', array(), '1.0.6');
+
+    wp_enqueue_script('sello-replanta-scripts', plugin_dir_url(__FILE__) . 'assets/js/sello-replanta.js', array('jquery'), '1.0.6', true);
+    wp_localize_script('sello-replanta-scripts', 'selloReplantaData', array(
+        'customBgColor' => isset(get_option('sello_replanta_options')['bg_color']) ? get_option('sello_replanta_options')['bg_color'] : '',
+    ));
+}
 
 // Registrar configuraciones
 add_action('admin_init', 'sello_replanta_settings');
@@ -107,10 +115,11 @@ function sello_replanta_setting_bg_color()
     echo "<p class='description'>Deja este campo vacío para usar el color detectado automáticamente.</p>";
 }
 
+
 function sello_replanta_options_validate($input)
 {
     $newinput = array();
-    $newinput['mode'] = trim($input['mode']);
+    $newinput['mode'] = sanitize_text_field($input['mode']);
     $newinput['bg_color'] = sanitize_hex_color($input['bg_color']); // Validar color hexadecimal
     return $newinput;
 }
@@ -147,31 +156,6 @@ function verificar_dominio_replanta($domain)
     return $is_hosted;
 }
 
-// Añadir estilos en línea en el encabezado
-add_action('wp_head', 'sello_replanta_inline_styles');
-
-function sello_replanta_inline_styles()
-{
-    echo '<style>
-        .sello-replanta-footer {
-            display: block !important;
-            text-align: center;
-            padding: 15px 0;
-            position: relative;
-            
-        }
-        .sello-replanta-img {
-            width: 110px;
-            height: auto;
-            transition: opacity 0.3s ease;
-        }
-        .sello-replanta-img:hover {
-            opacity: 0.9;
-        }
-    </style>';
-}
-
-// Reemplazar la función de enqueue scripts por esta
 
 add_action('wp_footer', 'sello_replanta_display_badge');
 
