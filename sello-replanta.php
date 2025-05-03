@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: Sello Replanta
  * Description: Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta.
@@ -72,7 +73,8 @@ function sello_replanta_options_page()
 
 add_action('plugins_loaded', 'sello_replanta_load_textdomain');
 
-function sello_replanta_load_textdomain() {
+function sello_replanta_load_textdomain()
+{
     load_plugin_textdomain('sello-replanta', false, dirname(plugin_basename(__FILE__)) . '/languages/');
 }
 
@@ -177,7 +179,6 @@ function verificar_dominio_replanta($domain)
             if (defined('WP_DEBUG') && WP_DEBUG) {
                 error_log('Dominio alojado en Replanta: ' . $domain);
             }
-           
         } else {
             if (defined('WP_DEBUG') && WP_DEBUG) {
                 error_log('Dominio no alojado en Replanta: ' . $domain);
@@ -204,36 +205,42 @@ function sello_replanta_display_badge()
 
         // Generar el div del sello
         echo '<div id="sello-replanta-container" style="display:none;">
-                <div class="sello-replanta-footer">
-                    <a href="https://replanta.net/web-hosting-ecologico/?dominio=' . esc_attr($domain) . '" target="_blank" rel="noopener">
-                        <img src="' . esc_url($image_url) . '" alt="Alojamiento web ecológico" class="sello-replanta-img">
-                    </a>
-                </div>
-              </div>';
-              echo '<script type="application/ld+json">
-              {
-                  "@context": "https://schema.org",
-                  "@type": "WebHostingService",
-                  "name": "Replanta Hosting Ecológico",
-                  "url": "https://replanta.net",
-                  "logo": "' . esc_url($image_url) . '",
-                  "description": "Replanta.net proporciona hosting ecológico con compensación de carbono para sitios web sostenibles.",
-                  "provider": {
-                      "@type": "Organization",
-                      "name": "Replanta",
-                      "url": "https://replanta.net",
-                      "sameAs": [
-                          "https://www.facebook.com/replanta",
-                          "https://www.twitter.com/replanta",
-                          "https://www.instagram.com/replanta"
-                      ]
-                  },
-                  "hostingData": {
-                      "@type": "WebSite",
-                      "name": "' . esc_attr($domain) . '",
-                      "url": "' . esc_url(home_url()) . '"
-                  }
-              }
-              </script>';  
+                <div class="sello-replanta-footer">';
+        // Modificar en sello_replanta_display_badge()
+        echo '<div class="sello-replanta-wrapper" aria-label="Certificado hosting ecológico">';
+        echo '<a href="https://replanta.net/web-hosting-ecologico/?utm_source=client-site&utm_medium=badge&utm_campaign=seal&domain=' . esc_attr($domain) . '" 
+        target="_blank" 
+        rel="noopener sponsored" 
+        class="replanta-seal-link">
+        <img src="' . esc_url($image_url) . '" 
+             alt="Certificado Hosting Ecológico Replanta - ' . esc_attr($domain) . '" 
+             width="110" 
+             height="40"
+             loading="lazy">
+                </a>';
+        echo '</div></div>';
+
+
+        // En sello_replanta_display_badge()
+        echo '<script type="application/ld+json">
+                {
+                    "@context": "https://schema.org",
+                    "@type": "Certification",
+                    "name": "Certificación Hosting Ecológico Replanta",
+                    "description": "Certificado oficial de sostenibilidad web emitido por Replanta",
+                    "image": "' . esc_url($image_url) . '",
+                    "recognizedBy": {
+                        "@type": "Organization",
+                        "name": "Replanta",
+                        "url": "https://replanta.net",
+                        "sameAs": "https://replanta.net/certificacion-ecologica"
+                    },
+                    "validFor": {
+                        "@type": "WebSite",
+                        "name": "' . esc_attr(get_bloginfo('name')) . '",
+                        "url": "' . esc_url(home_url()) . '"
+                    }
+                }
+                </script>';
     }
 }
