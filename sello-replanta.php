@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sello Replanta
  * Description: Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta.
- * Version: 1.0.10
+ * Version: 1.0.11
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -174,9 +174,14 @@ function verificar_dominio_replanta($domain)
 
     if (defined('WP_DEBUG') && WP_DEBUG) {
         if ($is_hosted) {
-            error_log('Dominio alojado en Replanta.');
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Dominio alojado en Replanta: ' . $domain);
+            }
+           
         } else {
-            error_log('Dominio no alojado en Replanta.');
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Dominio no alojado en Replanta: ' . $domain);
+            }
         }
     }
 
@@ -205,5 +210,30 @@ function sello_replanta_display_badge()
                     </a>
                 </div>
               </div>';
+              echo '<script type="application/ld+json">
+              {
+                  "@context": "https://schema.org",
+                  "@type": "WebHostingService",
+                  "name": "Replanta Hosting Ecológico",
+                  "url": "https://replanta.net",
+                  "logo": "' . esc_url($image_url) . '",
+                  "description": "Replanta.net proporciona hosting ecológico con compensación de carbono para sitios web sostenibles.",
+                  "provider": {
+                      "@type": "Organization",
+                      "name": "Replanta",
+                      "url": "https://replanta.net",
+                      "sameAs": [
+                          "https://www.facebook.com/replanta",
+                          "https://www.twitter.com/replanta",
+                          "https://www.instagram.com/replanta"
+                      ]
+                  },
+                  "hostingData": {
+                      "@type": "WebSite",
+                      "name": "' . esc_attr($domain) . '",
+                      "url": "' . esc_url(home_url()) . '"
+                  }
+              }
+              </script>';  
     }
 }
