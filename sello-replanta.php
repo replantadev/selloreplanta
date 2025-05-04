@@ -26,6 +26,7 @@ if (file_exists(SR_PLUGIN_PATH . 'vendor/autoload.php')) {
 
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
+$updateChecker->getVcsApi()->setAuthentication('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');
 $updateChecker = PucFactory::buildUpdateChecker(
     'https://github.com/replantadev/selloreplanta/',
     __FILE__,

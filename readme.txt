@@ -2,7 +2,7 @@
 Contributors: replantadev
 Tags: footer, sello, ecológico, carbono negativo
 Requires at least: 5.0
-Tested up to: 6.2
+Tested up to: 6.8.1
 Stable tag: 1.0.14
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
