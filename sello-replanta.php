@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Sello Replanta
  * Description: Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta.
- * Version: 1.0.12
+ * Version: 1.0.13
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
