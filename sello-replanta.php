@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Plugin Name: Sello Replanta
  * Description: Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta.
