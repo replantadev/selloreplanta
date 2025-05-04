@@ -1,8 +1,9 @@
 <?php
+
 /**
  * Plugin Name: Sello Replanta
  * Description: Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta.
- * Version: 1.0.14
+ * Version: 1.0.15
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -224,38 +225,39 @@ function sello_replanta_display_badge()
         $issue_date = date('c', strtotime('-1 month')); // Fecha de emisión realista
         $expiry_date = date('c', strtotime('+1 year'));
 
-        echo '<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "Certification",
-    "name": "Certificación de Hosting Ecológico",
-    "description": "Certificado oficial de sostenibilidad web emitido por Replanta de acuerdo con los estándares ISO 14064",
-    "image": "' . esc_url($image_url) . '",
-    "identifier": "' . $certification_id . '",
-    "author": {
-        "@type": "Organization",
-        "name": "Replanta",
-        "url": "https://replanta.net",
-        "sameAs": "https://replanta.net/certificacion-ecologica"
-    },
-    "about": {
-        "@type": "WebSite",
-        "name": "' . esc_attr(get_bloginfo('name')) . '",
-        "url": "' . esc_url(home_url()) . '",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Global"
-        }
-    },
-    "dateIssued": "' . $issue_date . '",
-    "validUntil": "' . $expiry_date . '",
-    "certificationStatus": "Active",
-    "maintainer": {
-        "@type": "Organization",
-        "name": "Replanta Certification Authority",
-        "url": "https://replanta.net/certificacion-ecologica"
-    }
-}
-</script>';
+        // Insertar schema markup válido y compatible con Google
+        echo '<script type="application/ld+json">' . json_encode([
+            "@context" => "https://schema.org",
+            "@type" => "CreativeWork",
+            "name" => "Certificación de Hosting Ecológico",
+            "award" => "Sello Replanta",
+            "description" => "Distintivo ecológico otorgado por Replanta a sitios web alojados en servidores con huella de carbono negativa.",
+            "url" => "https://replanta.net/certificacion?sitio=" . $domain,
+            "image" => $image_url,
+            "datePublished" => $issue_date,
+            "author" => [
+                "@type" => "Organization",
+                "name" => "Replanta",
+                "url" => "https://replanta.net"
+            ],
+            "publisher" => [
+                "@type" => "Organization",
+                "name" => "Replanta Certification Authority",
+                "url" => "https://replanta.net/certificacion-ecologica"
+            ]
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
+
+        echo '<script type="application/ld+json">' . json_encode([
+            "@context" => "https://schema.org",
+            "@type" => "Organization",
+            "name" => get_bloginfo('name'),
+            "url" => home_url(),
+            "logo" => $image_url,
+            "memberOf" => [
+                "@type" => "Organization",
+                "name" => "Replanta Green Hosting Certificación de Carbono Negativo",
+                "url" => "https://replanta.net/certificacion-ecologica"
+            ]
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
     }
 }
