@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Sello Replanta
  * Description: Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta.
- * Version: 1.0.15
+ * Version: 1.0.16
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -208,7 +208,7 @@ function sello_replanta_display_badge()
                 <div class="sello-replanta-footer">';
         // Modificar en sello_replanta_display_badge()
         echo '<div class="sello-replanta-wrapper" aria-label="Certificado hosting ecológico">';
-        echo '<a href="https://replanta.net/web-hosting-ecologico/?utm_source=client-site&utm_medium=badge&utm_campaign=seal&domain=' . esc_attr($domain) . '" 
+        echo '<a href="https://replanta.net/web-hosting-ecologico/?utm_source=' . esc_attr($domain) . '&utm_medium=badge&utm_campaign=seal&domain=' . esc_attr($domain) . '" 
         target="_blank" 
         rel="noopener sponsored" 
         class="replanta-seal-link">
