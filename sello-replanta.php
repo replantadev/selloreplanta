@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Sello Replanta
  * Description: Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta.
- * Version: 1.0.16
+ * Version: 1.0.17
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -80,6 +80,8 @@ function sello_replanta_load_textdomain()
 
 add_action('wp_enqueue_scripts', 'sello_replanta_enqueue_assets');
 
+add_action('wp_enqueue_scripts', 'sello_replanta_enqueue_assets');
+
 function sello_replanta_enqueue_assets()
 {
     // Registrar y cargar el CSS
@@ -90,20 +92,21 @@ function sello_replanta_enqueue_assets()
         '1.0.8'
     );
 
-    // Registrar y cargar el JS
-    wp_enqueue_script(
-        'sello-replanta-scripts',
-        plugin_dir_url(__FILE__) . 'assets/js/sello-replanta.js',
-        array('jquery'),
-        '1.0.8',
-        true
-    );
+    // Solo cargar el JS si no hay color personalizado
+    $options = get_option('sello_replanta_options');
+    $custom_bg_color = isset($options['bg_color']) ? trim($options['bg_color']) : '';
 
-    // Pasar datos al script JS
-    wp_localize_script('sello-replanta-scripts', 'selloReplantaData', array(
-        'customBgColor' => isset(get_option('sello_replanta_options')['bg_color']) ? get_option('sello_replanta_options')['bg_color'] : '',
-    ));
+    if (empty($custom_bg_color)) {
+        wp_enqueue_script(
+            'sello-replanta-scripts',
+            plugin_dir_url(__FILE__) . 'assets/js/sello-replanta.js',
+            array(),
+            '1.0.8',
+            true
+        );
+    }
 }
+
 
 // Registrar configuraciones
 add_action('admin_init', 'sello_replanta_settings');
