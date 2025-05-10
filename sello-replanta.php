@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Sello Replanta
  * Description: Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta.
- * Version: 1.0.17
+ * Version: 1.0.18
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -82,9 +82,11 @@ add_action('wp_enqueue_scripts', 'sello_replanta_enqueue_assets');
 
 add_action('wp_enqueue_scripts', 'sello_replanta_enqueue_assets');
 
-function sello_replanta_enqueue_assets()
-{
-    // Registrar y cargar el CSS
+add_action('wp_enqueue_scripts', 'sello_replanta_enqueue_assets');
+function sello_replanta_enqueue_assets() {
+    $is_hosted = get_option('sello_replanta_is_hosted', false);
+    if (!$is_hosted) return;
+
     wp_enqueue_style(
         'sello-replanta-styles',
         plugin_dir_url(__FILE__) . 'assets/css/sello-replanta.css',
@@ -92,7 +94,6 @@ function sello_replanta_enqueue_assets()
         '1.0.8'
     );
 
-    // Solo cargar el JS si no hay color personalizado
     $options = get_option('sello_replanta_options');
     $custom_bg_color = isset($options['bg_color']) ? trim($options['bg_color']) : '';
 
@@ -104,8 +105,12 @@ function sello_replanta_enqueue_assets()
             '1.0.8',
             true
         );
+        wp_localize_script('sello-replanta-scripts', 'selloReplantaData', array(
+            'customBgColor' => ''
+        ));
     }
 }
+
 
 
 // Registrar configuraciones
@@ -194,73 +199,73 @@ function verificar_dominio_replanta($domain)
 
 add_action('wp_footer', 'sello_replanta_display_badge');
 
-function sello_replanta_display_badge()
-{
+add_action('wp_footer', 'sello_replanta_display_badge');
+function sello_replanta_display_badge() {
     $is_hosted = get_option('sello_replanta_is_hosted', false);
     $options = get_option('sello_replanta_options');
     $mode = isset($options['mode']) ? $options['mode'] : 'light';
     $custom_bg_color = isset($options['bg_color']) ? $options['bg_color'] : '';
 
-    if ($is_hosted) {
-        $image_file = ($mode === 'dark') ? 'carbon-negative-b.svg' : 'carbon-negative.svg';
-        $image_url = plugin_dir_url(__FILE__) . 'imagenes/' . $image_file;
-        $domain = wp_parse_url(home_url(), PHP_URL_HOST);
+    if (!$is_hosted) return;
 
-        // Generar el div del sello
-        echo '<div id="sello-replanta-container" style="display:none;">
-                <div class="sello-replanta-footer">';
-        // Modificar en sello_replanta_display_badge()
-        echo '<div class="sello-replanta-wrapper" aria-label="Certificado hosting ecológico">';
-        echo '<a href="https://replanta.net/web-hosting-ecologico/?utm_source=' . esc_attr($domain) . '&utm_medium=badge&utm_campaign=seal&domain=' . esc_attr($domain) . '" 
-        target="_blank" 
-        rel="noopener sponsored" 
-        class="replanta-seal-link">
-        <img src="' . esc_url($image_url) . '" 
-             alt="Certificado Hosting Ecológico Replanta - ' . esc_attr($domain) . '" 
-             width="110" 
-             height="40"
-             loading="lazy">
-                </a>';
-        echo '</div></div>';
+    $image_file = ($mode === 'dark') ? 'carbon-negative-b.svg' : 'carbon-negative.svg';
+    $image_url = plugin_dir_url(__FILE__) . 'imagenes/' . $image_file;
+    $domain = wp_parse_url(home_url(), PHP_URL_HOST);
 
-
-        $certification_id = 'REP-' . md5($domain);
-        $issue_date = date('c', strtotime('-1 month')); // Fecha de emisión realista
-        $expiry_date = date('c', strtotime('+1 year'));
-
-        // Insertar schema markup válido y compatible con Google
-        echo '<script type="application/ld+json">' . json_encode([
-            "@context" => "https://schema.org",
-            "@type" => "CreativeWork",
-            "name" => "Certificación de Hosting Ecológico",
-            "award" => "Sello Replanta",
-            "description" => "Distintivo ecológico otorgado por Replanta a sitios web alojados en servidores con huella de carbono negativa.",
-            "url" => "https://replanta.net/certificacion?sitio=" . $domain,
-            "image" => $image_url,
-            "datePublished" => $issue_date,
-            "author" => [
-                "@type" => "Organization",
-                "name" => "Replanta",
-                "url" => "https://replanta.net"
-            ],
-            "publisher" => [
-                "@type" => "Organization",
-                "name" => "Replanta Certification Authority",
-                "url" => "https://replanta.net/certificacion-ecologica"
-            ]
-        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
-
-        echo '<script type="application/ld+json">' . json_encode([
-            "@context" => "https://schema.org",
-            "@type" => "Organization",
-            "name" => get_bloginfo('name'),
-            "url" => home_url(),
-            "logo" => $image_url,
-            "memberOf" => [
-                "@type" => "Organization",
-                "name" => "Replanta Green Hosting Certificación de Carbono Negativo",
-                "url" => "https://replanta.net/certificacion-ecologica"
-            ]
-        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
+    // Aplicar estilo inline solo si hay color definido
+    $style_inline = '';
+    if (!empty($custom_bg_color)) {
+        $style_inline = 'background-color: ' . esc_attr($custom_bg_color) . ';';
     }
+
+    echo '<div id="sello-replanta-container" style="' . esc_attr($style_inline) . '">
+        <div class="sello-replanta-footer">
+            <div class="sello-replanta-wrapper" aria-label="Certificado hosting ecológico">
+                <a href="https://replanta.net/web-hosting-ecologico/?utm_source=' . esc_attr($domain) . '&utm_medium=badge&utm_campaign=seal&domain=' . esc_attr($domain) . '" 
+                    target="_blank" rel="noopener sponsored" class="replanta-seal-link">
+                    <img src="' . esc_url($image_url) . '" alt="Certificado Hosting Ecológico Replanta - ' . esc_attr($domain) . '" width="110" height="40" loading="lazy">
+                </a>
+            </div>
+        </div>
+    </div>';
+
+    // Schema JSON-LD
+    $certification_id = 'REP-' . md5($domain);
+    $issue_date = date('c', strtotime('-1 month'));
+    $expiry_date = date('c', strtotime('+1 year'));
+
+    echo '<script type="application/ld+json">' . json_encode([
+        "@context" => "https://schema.org",
+        "@type" => "CreativeWork",
+        "name" => "Certificación de Hosting Ecológico",
+        "award" => "Sello Replanta",
+        "description" => "Distintivo ecológico otorgado por Replanta a sitios web alojados en servidores con huella de carbono negativa.",
+        "url" => "https://replanta.net/certificacion?sitio=" . $domain,
+        "image" => $image_url,
+        "datePublished" => $issue_date,
+        "author" => [
+            "@type" => "Organization",
+            "name" => "Replanta",
+            "url" => "https://replanta.net"
+        ],
+        "publisher" => [
+            "@type" => "Organization",
+            "name" => "Replanta Certification Authority",
+            "url" => "https://replanta.net/certificacion-ecologica"
+        ]
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
+
+    echo '<script type="application/ld+json">' . json_encode([
+        "@context" => "https://schema.org",
+        "@type" => "Organization",
+        "name" => get_bloginfo('name'),
+        "url" => home_url(),
+        "logo" => $image_url,
+        "memberOf" => [
+            "@type" => "Organization",
+            "name" => "Replanta Green Hosting Certificación de Carbono Negativo",
+            "url" => "https://replanta.net/certificacion-ecologica"
+        ]
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
 }
+
