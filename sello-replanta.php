@@ -78,6 +78,13 @@ function sello_replanta_load_textdomain()
     load_plugin_textdomain('sello-replanta', false, dirname(plugin_basename(__FILE__)) . '/languages/');
 }
 
+function sello_replanta_get_version() {
+    if (!function_exists('get_file_data')) {
+        require_once ABSPATH . 'wp-includes/functions.php';
+    }
+    $plugin_data = get_file_data(__FILE__, array('Version' => 'Version'));
+    return isset($plugin_data['Version']) ? $plugin_data['Version'] : '1.0.0';
+}
 
 add_action('wp_enqueue_scripts', 'sello_replanta_enqueue_assets');
 function sello_replanta_enqueue_assets()
@@ -89,7 +96,7 @@ function sello_replanta_enqueue_assets()
         'sello-replanta-styles',
         plugin_dir_url(__FILE__) . 'assets/css/sello-replanta.css',
         array(),
-        '1.0.8'
+        sello_replanta_get_version()
     );
 
     $options = get_option('sello_replanta_options');
@@ -100,7 +107,7 @@ function sello_replanta_enqueue_assets()
             'sello-replanta-scripts',
             plugin_dir_url(__FILE__) . 'assets/js/sello-replanta.js',
             array(),
-            '1.0.8',
+            sello_replanta_get_version(),
             true
         );
         wp_localize_script('sello-replanta-scripts', 'selloReplantaData', array(
