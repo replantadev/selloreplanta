@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: Sello Replanta
  * Description: Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta.
@@ -77,12 +78,10 @@ function sello_replanta_load_textdomain()
     load_plugin_textdomain('sello-replanta', false, dirname(plugin_basename(__FILE__)) . '/languages/');
 }
 
-add_action('wp_enqueue_scripts', 'sello_replanta_enqueue_assets');
 
 add_action('wp_enqueue_scripts', 'sello_replanta_enqueue_assets');
-
-add_action('wp_enqueue_scripts', 'sello_replanta_enqueue_assets');
-function sello_replanta_enqueue_assets() {
+function sello_replanta_enqueue_assets()
+{
     $is_hosted = get_option('sello_replanta_is_hosted', false);
     if (!$is_hosted) return;
 
@@ -195,11 +194,10 @@ function verificar_dominio_replanta($domain)
 
     return $is_hosted;
 }
-
+// Mostrar el sello en el pie de página
 add_action('wp_footer', 'sello_replanta_display_badge');
-
-add_action('wp_footer', 'sello_replanta_display_badge');
-function sello_replanta_display_badge() {
+function sello_replanta_display_badge()
+{
     $is_hosted = get_option('sello_replanta_is_hosted', false);
     $options = get_option('sello_replanta_options');
     $mode = isset($options['mode']) ? $options['mode'] : 'light';
@@ -267,4 +265,3 @@ function sello_replanta_display_badge() {
         ]
     ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
 }
-
