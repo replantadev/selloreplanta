@@ -1,6 +1,21 @@
-# Sello Replanta
+# 🌱 Sello Replanta
 
-**Sello Replanta** es un plugin para WordPress diseñado para integrar funcionalidades específicas relacionadas con la sostenibilidad y el medio ambiente en tu sitio web.
+**Sello Replanta** es un plugin gratuito para WordPress que añade automáticamente un distintivo de sostenibilidad a tu sitio web, demostrando que está alojado en servidores con impacto climático **positivo**. Ideal para marcas conscientes que desean comunicar su compromiso ambiental.
+
+🔗 Sitio oficial: [replanta.net](https://replanta.net)  
+ 
+🚀 Web Hosting Ecológico: [replanta.net/web-hosting-ecologico](https://replanta.net/web-hosting-ecologico)  
+🛠️ Desarrollo WordPress & Plugins: [replanta.net/diseno-web-sostenible/](https://replanta.net/diseno-web-sostenible/)
+
+---
+
+## 🌍 ¿Qué hace este plugin?
+
+- Muestra un **sello ecológico personalizado** en el pie de tu web.
+- Verifica automáticamente si tu dominio está alojado en [Replanta Hosting Ecológico](https://replanta.net/web-hosting-ecologico).
+- Permite personalizar el estilo del sello (modo claro/oscuro, colores).
+- Genera **marcado Schema.org válido** para SEO y rich results.
+- Compatible con cualquier tema y plugin moderno de WordPress.
 
 ## Características
 
