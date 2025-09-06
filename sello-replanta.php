@@ -1,8 +1,9 @@
 <?php
+
 /**
  * Plugin Name: Sello Replanta
  * Description: Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta.
- * Version: 1.0.19
+ * Version: 1.0.20
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -82,15 +83,17 @@ function sello_replanta_get_version() {
         require_once ABSPATH . 'wp-includes/functions.php';
     }
     $plugin_data = get_file_data(__FILE__, array('Version' => 'Version'));
-    return isset($plugin_data['Version']) ? $plugin_data['Version'] : '1.0.0';
+    return isset($plugin_data['Version']) ? $plugin_data['Version'] : '1.0.20';
 }
 
 add_action('wp_enqueue_scripts', 'sello_replanta_enqueue_assets');
+
 function sello_replanta_enqueue_assets()
 {
     $is_hosted = get_option('sello_replanta_is_hosted', false);
     if (!$is_hosted) return;
 
+    // Registrar y cargar el CSS
     wp_enqueue_style(
         'sello-replanta-styles',
         plugin_dir_url(__FILE__) . 'assets/css/sello-replanta.css',
@@ -98,23 +101,25 @@ function sello_replanta_enqueue_assets()
         sello_replanta_get_version()
     );
 
+    // Obtener opciones
     $options = get_option('sello_replanta_options');
     $custom_bg_color = isset($options['bg_color']) ? trim($options['bg_color']) : '';
 
-    if (empty($custom_bg_color)) {
-        wp_enqueue_script(
-            'sello-replanta-scripts',
-            plugin_dir_url(__FILE__) . 'assets/js/sello-replanta.js',
-            array(),
-            sello_replanta_get_version(),
-            true
-        );
-        wp_localize_script('sello-replanta-scripts', 'selloReplantaData', array(
-            'customBgColor' => ''
-        ));
-    }
-}
+    // Cargar JavaScript siempre para manejar el posicionamiento
+    wp_enqueue_script(
+        'sello-replanta-scripts',
+        plugin_dir_url(__FILE__) . 'assets/js/sello-replanta.js',
+        array(),
+        sello_replanta_get_version(),
+        true
+    );
 
+    // Pasar datos al JavaScript
+    wp_localize_script('sello-replanta-scripts', 'selloReplantaData', array(
+        'customBgColor' => $custom_bg_color,
+        'pluginUrl' => plugin_dir_url(__FILE__)
+    ));
+}
 
 
 // Registrar configuraciones
@@ -200,39 +205,49 @@ function verificar_dominio_replanta($domain)
 
     return $is_hosted;
 }
-// Mostrar el sello en el pie de página
+
 add_action('wp_footer', 'sello_replanta_display_badge');
+
 function sello_replanta_display_badge()
 {
     $is_hosted = get_option('sello_replanta_is_hosted', false);
+    
+    if (!$is_hosted) return;
+    
     $options = get_option('sello_replanta_options');
     $mode = isset($options['mode']) ? $options['mode'] : 'light';
-    $custom_bg_color = isset($options['bg_color']) ? $options['bg_color'] : '';
-
-    if (!$is_hosted) return;
+    $custom_bg_color = isset($options['bg_color']) ? trim($options['bg_color']) : '';
 
     $image_file = ($mode === 'dark') ? 'carbon-negative-b.svg' : 'carbon-negative.svg';
     $image_url = plugin_dir_url(__FILE__) . 'imagenes/' . $image_file;
     $domain = wp_parse_url(home_url(), PHP_URL_HOST);
 
-    // Aplicar estilo inline solo si hay color definido
-    $style_inline = '';
+    // Estilo inline para color de fondo personalizado
+    $inline_style = '';
     if (!empty($custom_bg_color)) {
-        $style_inline = 'background-color: ' . esc_attr($custom_bg_color) . ';';
+        $inline_style = ' style="background-color: ' . esc_attr($custom_bg_color) . ';"';
     }
 
-    echo '<div id="sello-replanta-container" style="' . esc_attr($style_inline) . '">
+    // Generar el HTML del sello con estructura más robusta
+    echo '<div id="sello-replanta-container"' . $inline_style . '>
         <div class="sello-replanta-footer">
             <div class="sello-replanta-wrapper" aria-label="Certificado hosting ecológico">
                 <a href="https://replanta.net/web-hosting-ecologico/?utm_source=' . esc_attr($domain) . '&utm_medium=badge&utm_campaign=seal&domain=' . esc_attr($domain) . '" 
-                    target="_blank" rel="noopener sponsored" class="replanta-seal-link">
-                    <img src="' . esc_url($image_url) . '" alt="Certificado Hosting Ecológico Replanta - ' . esc_attr($domain) . '" width="110" height="40" loading="lazy">
+                   target="_blank" 
+                   rel="noopener sponsored" 
+                   class="replanta-seal-link">
+                    <img src="' . esc_url($image_url) . '" 
+                         alt="Certificado Hosting Ecológico Replanta - ' . esc_attr($domain) . '" 
+                         width="110" 
+                         height="40"
+                         loading="lazy"
+                         class="sello-replanta-img">
                 </a>
             </div>
         </div>
     </div>';
 
-    // Schema JSON-LD
+    // Schema markup para SEO
     $certification_id = 'REP-' . md5($domain);
     $issue_date = date('c', strtotime('-1 month'));
     $expiry_date = date('c', strtotime('+1 year'));

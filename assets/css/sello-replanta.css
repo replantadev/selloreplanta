@@ -1,16 +1,80 @@
+/* Sello Replanta - Estilos principales */
+#sello-replanta-container {
+    width: 100% !important;
+    clear: both !important;
+    z-index: 9999 !important;
+    position: relative !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+
 .sello-replanta-footer {
     display: block !important;
-    text-align: center;
-    padding: 15px 0;
-    position: relative;
+    text-align: center !important;
+    padding: 15px 10px !important;
+    position: relative !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+}
+
+.sello-replanta-wrapper {
+    display: inline-block !important;
+    margin: 0 auto !important;
+    position: relative !important;
+}
+
+.replanta-seal-link {
+    display: inline-block !important;
+    text-decoration: none !important;
+    border: none !important;
+    outline: none !important;
+    transition: transform 0.2s ease, opacity 0.2s ease !important;
+}
+
+.replanta-seal-link:hover {
+    transform: scale(1.05) !important;
+    opacity: 0.9 !important;
 }
 
 .sello-replanta-img {
-    width: 110px;
-    height: auto;
-    transition: opacity 0.3s ease;
+    width: 110px !important;
+    height: 40px !important;
+    max-width: 110px !important;
+    max-height: 40px !important;
+    display: block !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    vertical-align: middle !important;
+    object-fit: contain !important;
 }
 
-.sello-replanta-img:hover {
-    opacity: 0.9;
+/* Responsive */
+@media (max-width: 480px) {
+    .sello-replanta-footer {
+        padding: 10px 5px !important;
+    }
+    
+    .sello-replanta-img {
+        width: 88px !important;
+        height: 32px !important;
+        max-width: 88px !important;
+        max-height: 32px !important;
+    }
+}
+
+/* Asegurar visibilidad en cualquier tema */
+#sello-replanta-container * {
+    box-sizing: border-box !important;
+}
+
+/* Reset de estilos que podrían interferir */
+.sello-replanta-footer,
+.sello-replanta-wrapper,
+.replanta-seal-link,
+.sello-replanta-img {
+    animation: none !important;
+    transform-origin: center !important;
 }

@@ -1,41 +1,122 @@
-document.addEventListener("DOMContentLoaded", function () {
-    var selloContainer = document.getElementById("sello-replanta-container");
-    var footer = document.querySelector("footer");
-    if (selloContainer && footer) {
-        var customBgColor = selloReplantaData.customBgColor;
+/**
+ * Sello Replanta - JavaScript mejorado para compatibilidad universal
+ */
+(function() {
+    'use strict';
 
-        if (customBgColor) {
-            // Usar el color configurado por el usuario
-            selloContainer.style.backgroundColor = customBgColor;
+    // Esperar a que el DOM esté listo
+    function initSelloReplanta() {
+        var selloContainer = document.getElementById('sello-replanta-container');
+        
+        if (!selloContainer) {
+            return;
+        }
+
+        // Aplicar color de fondo personalizado si se especifica
+        if (typeof selloReplantaData !== 'undefined' && selloReplantaData.customBgColor) {
+            selloContainer.style.backgroundColor = selloReplantaData.customBgColor;
         } else {
-            // Detectar el último elemento visible dentro del footer
-            var lastElement = Array.from(footer.children).reverse().find(function (el) {
-                return window.getComputedStyle(el).display !== "none";
-            });
+            // Detectar automáticamente el color de fondo
+            detectAndApplyBackgroundColor(selloContainer);
+        }
 
-            // Si no hay un último elemento visible, usar el footer como referencia
-            if (!lastElement) {
-                lastElement = footer;
-            }
+        // Insertar el sello en la posición más apropiada
+        positionSello(selloContainer);
+        
+        // Mostrar el sello
+        selloContainer.style.display = 'block';
+        selloContainer.style.visibility = 'visible';
+    }
 
-            // Obtener el color de fondo del último elemento visible
-            var computedStyle = window.getComputedStyle(lastElement);
-            var backgroundColor = computedStyle.backgroundColor;
+    function detectAndApplyBackgroundColor(selloContainer) {
+        try {
+            // Buscar elementos potenciales del footer
+            var footerElements = [
+                document.querySelector('footer'),
+                document.querySelector('.footer'),
+                document.querySelector('#footer'),
+                document.querySelector('[class*="footer"]'),
+                document.querySelector('body > div:last-child'),
+                document.body
+            ];
 
-            // Si el último elemento no tiene color de fondo explícito, buscar en sus hijos
-            if (backgroundColor === "rgba(0, 0, 0, 0)" || backgroundColor === "transparent") {
-                var child = lastElement.querySelector("*");
-                if (child) {
-                    backgroundColor = window.getComputedStyle(child).backgroundColor;
+            var backgroundColor = null;
+            
+            for (var i = 0; i < footerElements.length; i++) {
+                var element = footerElements[i];
+                if (element) {
+                    var style = window.getComputedStyle(element);
+                    var bgColor = style.backgroundColor;
+                    
+                    // Verificar si el color no es transparente
+                    if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+                        backgroundColor = bgColor;
+                        break;
+                    }
                 }
             }
 
-            // Aplicar el color de fondo detectado
-            selloContainer.style.backgroundColor = backgroundColor;
+            // Aplicar el color detectado o un color por defecto
+            if (backgroundColor) {
+                selloContainer.style.backgroundColor = backgroundColor;
+            } else {
+                // Color por defecto si no se puede detectar
+                selloContainer.style.backgroundColor = '#ffffff';
+            }
+        } catch (error) {
+            console.log('Sello Replanta: Error detectando color de fondo, usando color por defecto');
+            selloContainer.style.backgroundColor = '#ffffff';
         }
-
-        // Insertar el sello como último hijo del footer
-        footer.appendChild(selloContainer);
-        selloContainer.style.display = "block";
     }
-});
+
+    function positionSello(selloContainer) {
+        try {
+            // Estrategia 1: Buscar un footer existente
+            var footer = document.querySelector('footer') || 
+                        document.querySelector('.footer') || 
+                        document.querySelector('#footer') ||
+                        document.querySelector('[class*="footer"]');
+
+            if (footer && footer.parentNode) {
+                footer.appendChild(selloContainer);
+                return;
+            }
+
+            // Estrategia 2: Añadir al final del body
+            if (document.body) {
+                document.body.appendChild(selloContainer);
+                return;
+            }
+
+            // Estrategia 3: Añadir antes del cierre del HTML
+            var lastDiv = document.querySelector('body > div:last-child');
+            if (lastDiv && lastDiv.parentNode) {
+                lastDiv.parentNode.insertBefore(selloContainer, lastDiv.nextSibling);
+                return;
+            }
+
+        } catch (error) {
+            console.log('Sello Replanta: Error posicionando el sello, usando posición por defecto');
+            // Último recurso: añadir al body
+            if (document.body) {
+                document.body.appendChild(selloContainer);
+            }
+        }
+    }
+
+    // Múltiples puntos de entrada para asegurar la inicialización
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSelloReplanta);
+    } else {
+        initSelloReplanta();
+    }
+
+    // Fallback adicional
+    window.addEventListener('load', function() {
+        var selloContainer = document.getElementById('sello-replanta-container');
+        if (selloContainer && selloContainer.style.display === 'none') {
+            initSelloReplanta();
+        }
+    });
+
+})();
