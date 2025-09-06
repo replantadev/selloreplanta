@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Plugin Name: Sello Replanta
- * Description: Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta.
- * Version: 1.0.20
+ * Plugin Name: Sello Replanta PRO
+ * Description: Sello de carbono negativo inteligente que se adapta a cualquier page builder (Elementor, Divi, etc.). Versión PRO con detección avanzada.
+ * Version: 2.0.0
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -20,6 +20,41 @@ if (!defined('ABSPATH')) {
 
 define('SR_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('SR_PLUGIN_URL', plugin_dir_url(__FILE__));
+define('SR_VERSION', '2.0.0');
+
+// Detectar page builders activos
+add_action('init', 'sello_replanta_detect_page_builders');
+
+function sello_replanta_detect_page_builders() {
+    $page_builders = array();
+    
+    // Detectar Elementor
+    if (defined('ELEMENTOR_VERSION') || class_exists('Elementor\Plugin')) {
+        $page_builders[] = 'elementor';
+    }
+    
+    // Detectar Divi
+    if (function_exists('et_get_theme_version') || get_template() === 'Divi') {
+        $page_builders[] = 'divi';
+    }
+    
+    // Detectar Beaver Builder
+    if (class_exists('FLBuilder')) {
+        $page_builders[] = 'beaver';
+    }
+    
+    // Detectar Visual Composer
+    if (defined('WPB_VC_VERSION')) {
+        $page_builders[] = 'visual_composer';
+    }
+    
+    // Detectar Gutenberg/Block Editor
+    if (function_exists('has_blocks')) {
+        $page_builders[] = 'gutenberg';
+    }
+    
+    update_option('sello_replanta_page_builders', $page_builders);
+}
 
 if (file_exists(SR_PLUGIN_PATH . 'vendor/autoload.php')) {
     require_once SR_PLUGIN_PATH . 'vendor/autoload.php';
@@ -83,7 +118,7 @@ function sello_replanta_get_version() {
         require_once ABSPATH . 'wp-includes/functions.php';
     }
     $plugin_data = get_file_data(__FILE__, array('Version' => 'Version'));
-    return isset($plugin_data['Version']) ? $plugin_data['Version'] : '1.0.20';
+    return isset($plugin_data['Version']) ? $plugin_data['Version'] : SR_VERSION;
 }
 
 add_action('wp_enqueue_scripts', 'sello_replanta_enqueue_assets');
@@ -131,11 +166,18 @@ function sello_replanta_settings()
     add_settings_section('sello_replanta_main', 'Configuración Principal', 'sello_replanta_section_text', 'sello-replanta');
     add_settings_field('sello_replanta_mode', 'Modo', 'sello_replanta_setting_mode', 'sello-replanta', 'sello_replanta_main');
     add_settings_field('sello_replanta_bg_color', 'Color de Fondo', 'sello_replanta_setting_bg_color', 'sello-replanta', 'sello_replanta_main');
+    add_settings_field('sello_replanta_position', 'Posición', 'sello_replanta_setting_position', 'sello-replanta', 'sello_replanta_main');
+    add_settings_field('sello_replanta_size', 'Tamaño', 'sello_replanta_setting_size', 'sello-replanta', 'sello_replanta_main');
+    add_settings_field('sello_replanta_opacity', 'Opacidad', 'sello_replanta_setting_opacity', 'sello-replanta', 'sello_replanta_main');
 }
 
 function sello_replanta_section_text()
 {
-    echo '<p>Configure las opciones del Sello Replanta.</p>';
+    $page_builders = get_option('sello_replanta_page_builders', array());
+    echo '<p>Configure las opciones del Sello Replanta PRO.</p>';
+    if (!empty($page_builders)) {
+        echo '<p><strong>Page builders detectados:</strong> ' . implode(', ', array_map('ucfirst', $page_builders)) . '</p>';
+    }
 }
 
 function sello_replanta_setting_mode()
@@ -156,11 +198,56 @@ function sello_replanta_setting_bg_color()
     echo "<p class='description'>Deja este campo vacío para usar el color detectado automáticamente.</p>";
 }
 
+function sello_replanta_setting_position()
+{
+    $options = get_option('sello_replanta_options');
+    $position = isset($options['position']) ? $options['position'] : 'auto';
+    echo "<select id='sello_replanta_position' name='sello_replanta_options[position]'>
+            <option value='auto'" . selected($position, 'auto', false) . ">Automático (Detectar)</option>
+            <option value='footer_end'" . selected($position, 'footer_end', false) . ">Final del Footer</option>
+            <option value='body_end'" . selected($position, 'body_end', false) . ">Final del Body</option>
+            <option value='fixed_bottom'" . selected($position, 'fixed_bottom', false) . ">Fijo Abajo</option>
+            <option value='elementor_footer'" . selected($position, 'elementor_footer', false) . ">Footer Elementor</option>
+          </select>";
+    echo "<p class='description'>Elige dónde mostrar el sello. 'Automático' detecta la mejor posición.</p>";
+}
+
+function sello_replanta_setting_size()
+{
+    $options = get_option('sello_replanta_options');
+    $size = isset($options['size']) ? $options['size'] : 'normal';
+    echo "<select id='sello_replanta_size' name='sello_replanta_options[size]'>
+            <option value='small'" . selected($size, 'small', false) . ">Pequeño (88x32px)</option>
+            <option value='normal'" . selected($size, 'normal', false) . ">Normal (110x40px)</option>
+            <option value='large'" . selected($size, 'large', false) . ">Grande (132x48px)</option>
+          </select>";
+}
+
+function sello_replanta_setting_opacity()
+{
+    $options = get_option('sello_replanta_options');
+    $opacity = isset($options['opacity']) ? $options['opacity'] : '1.0';
+    echo "<input type='range' id='sello_replanta_opacity' name='sello_replanta_options[opacity]' value='" . esc_attr($opacity) . "' min='0.3' max='1.0' step='0.1' />";
+    echo "<span id='opacity_value'>" . esc_html($opacity) . "</span>";
+    echo "<p class='description'>Ajusta la transparencia del sello (0.3 = muy transparente, 1.0 = opaco).</p>";
+    echo "<script>
+        document.getElementById('sello_replanta_opacity').addEventListener('input', function() {
+            document.getElementById('opacity_value').textContent = this.value;
+        });
+    </script>";
+}
+
 function sello_replanta_options_validate($input)
 {
     $newinput = array();
     $newinput['mode'] = sanitize_text_field($input['mode']);
-    $newinput['bg_color'] = sanitize_hex_color($input['bg_color']); // Validar color hexadecimal
+    $newinput['bg_color'] = sanitize_hex_color($input['bg_color']);
+    $newinput['position'] = in_array($input['position'], ['auto', 'footer_end', 'body_end', 'fixed_bottom', 'elementor_footer']) 
+        ? sanitize_text_field($input['position']) : 'auto';
+    $newinput['size'] = in_array($input['size'], ['small', 'normal', 'large']) 
+        ? sanitize_text_field($input['size']) : 'normal';
+    $newinput['opacity'] = floatval($input['opacity']) >= 0.3 && floatval($input['opacity']) <= 1.0 
+        ? floatval($input['opacity']) : 1.0;
     return $newinput;
 }
 
@@ -217,19 +304,47 @@ function sello_replanta_display_badge()
     $options = get_option('sello_replanta_options');
     $mode = isset($options['mode']) ? $options['mode'] : 'light';
     $custom_bg_color = isset($options['bg_color']) ? trim($options['bg_color']) : '';
+    $position = isset($options['position']) ? $options['position'] : 'auto';
+    $size = isset($options['size']) ? $options['size'] : 'normal';
+    $opacity = isset($options['opacity']) ? $options['opacity'] : 1.0;
+
+    // Configurar tamaños según la opción
+    $sizes = array(
+        'small' => array('width' => 88, 'height' => 32),
+        'normal' => array('width' => 110, 'height' => 40),
+        'large' => array('width' => 132, 'height' => 48)
+    );
+    $current_size = $sizes[$size];
 
     $image_file = ($mode === 'dark') ? 'carbon-negative-b.svg' : 'carbon-negative.svg';
     $image_url = plugin_dir_url(__FILE__) . 'imagenes/' . $image_file;
     $domain = wp_parse_url(home_url(), PHP_URL_HOST);
 
-    // Estilo inline para color de fondo personalizado
-    $inline_style = '';
-    if (!empty($custom_bg_color)) {
-        $inline_style = ' style="background-color: ' . esc_attr($custom_bg_color) . ';"';
+    // Detectar page builders para posicionamiento inteligente
+    $page_builders = get_option('sello_replanta_page_builders', array());
+    
+    // Determinar la estrategia de posicionamiento
+    $positioning_class = 'sello-position-auto';
+    if ($position === 'fixed_bottom') {
+        $positioning_class = 'sello-position-fixed';
+    } elseif ($position === 'elementor_footer' && in_array('elementor', $page_builders)) {
+        $positioning_class = 'sello-position-elementor';
+    } elseif ($position === 'body_end') {
+        $positioning_class = 'sello-position-body-end';
     }
 
-    // Generar el HTML del sello con estructura más robusta
-    echo '<div id="sello-replanta-container"' . $inline_style . '>
+    // Estilo inline para personalizaciones
+    $inline_styles = array();
+    if (!empty($custom_bg_color)) {
+        $inline_styles[] = 'background-color: ' . esc_attr($custom_bg_color);
+    }
+    if ($opacity < 1.0) {
+        $inline_styles[] = 'opacity: ' . esc_attr($opacity);
+    }
+    $style_attr = !empty($inline_styles) ? ' style="' . implode('; ', $inline_styles) . ';"' : '';
+
+    // Generar el HTML del sello con configuración PRO
+    echo '<div id="sello-replanta-container" class="' . esc_attr($positioning_class) . ' sello-size-' . esc_attr($size) . '"' . $style_attr . ' data-position="' . esc_attr($position) . '" data-builders="' . esc_attr(implode(',', $page_builders)) . '">
         <div class="sello-replanta-footer">
             <div class="sello-replanta-wrapper" aria-label="Certificado hosting ecológico">
                 <a href="https://replanta.net/web-hosting-ecologico/?utm_source=' . esc_attr($domain) . '&utm_medium=badge&utm_campaign=seal&domain=' . esc_attr($domain) . '" 
@@ -238,8 +353,8 @@ function sello_replanta_display_badge()
                    class="replanta-seal-link">
                     <img src="' . esc_url($image_url) . '" 
                          alt="Certificado Hosting Ecológico Replanta - ' . esc_attr($domain) . '" 
-                         width="110" 
-                         height="40"
+                         width="' . esc_attr($current_size['width']) . '" 
+                         height="' . esc_attr($current_size['height']) . '"
                          loading="lazy"
                          class="sello-replanta-img">
                 </a>
@@ -247,7 +362,7 @@ function sello_replanta_display_badge()
         </div>
     </div>';
 
-    // Schema markup para SEO
+    // Schema markup para SEO (mantenemos igual)
     $certification_id = 'REP-' . md5($domain);
     $issue_date = date('c', strtotime('-1 month'));
     $expiry_date = date('c', strtotime('+1 year'));

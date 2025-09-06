@@ -1,4 +1,6 @@
-/* Sello Replanta - Estilos principales */
+/* Sello Replanta PRO - Estilos avanzados para page builders */
+
+/* === BASE STYLES === */
 #sello-replanta-container {
     width: 100% !important;
     clear: both !important;
@@ -7,6 +9,7 @@
     margin: 0 !important;
     padding: 0 !important;
     box-sizing: border-box !important;
+    transition: all 0.3s ease !important;
 }
 
 .sello-replanta-footer {
@@ -39,42 +42,197 @@
 }
 
 .sello-replanta-img {
-    width: 110px !important;
-    height: 40px !important;
-    max-width: 110px !important;
-    max-height: 40px !important;
     display: block !important;
     border: none !important;
     margin: 0 !important;
     padding: 0 !important;
-    vertical-align: middle !important;
     object-fit: contain !important;
+    transition: filter 0.2s ease !important;
 }
 
-/* Responsive */
-@media (max-width: 480px) {
+/* === SIZE VARIANTS === */
+.sello-size-small .sello-replanta-img {
+    width: 88px !important;
+    height: 32px !important;
+    max-width: 88px !important;
+    max-height: 32px !important;
+}
+
+.sello-size-normal .sello-replanta-img {
+    width: 110px !important;
+    height: 40px !important;
+    max-width: 110px !important;
+    max-height: 40px !important;
+}
+
+.sello-size-large .sello-replanta-img {
+    width: 132px !important;
+    height: 48px !important;
+    max-width: 132px !important;
+    max-height: 48px !important;
+}
+
+/* === POSITIONING STRATEGIES === */
+
+/* Posición automática - default */
+.sello-position-auto {
+    position: relative !important;
+    display: block !important;
+}
+
+/* Posición fija en la parte inferior */
+.sello-position-fixed {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 99999 !important;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1) !important;
+}
+
+.sello-position-fixed .sello-replanta-footer {
+    padding: 10px !important;
+}
+
+/* Posición específica para Elementor */
+.sello-position-elementor {
+    position: relative !important;
+    width: 100% !important;
+}
+
+/* Body end positioning */
+.sello-position-body-end {
+    position: relative !important;
+    margin-top: 20px !important;
+}
+
+/* === PAGE BUILDER SPECIFIC STYLES === */
+
+/* Elementor Footer Location */
+.elementor-location-footer #sello-replanta-container,
+.elementor-footer-bottom #sello-replanta-container {
+    margin-top: 0 !important;
+    border-top: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+/* Divi Footer */
+#et-footer-nav #sello-replanta-container,
+.et_pb_section_footer #sello-replanta-container {
+    margin-top: 10px !important;
+}
+
+/* Beaver Builder */
+.fl-builder-content .fl-row:last-child #sello-replanta-container {
+    margin-top: 15px !important;
+}
+
+/* === RESPONSIVE DESIGN === */
+@media (max-width: 768px) {
     .sello-replanta-footer {
         padding: 10px 5px !important;
     }
     
-    .sello-replanta-img {
+    .sello-size-small .sello-replanta-img {
+        width: 70px !important;
+        height: 26px !important;
+    }
+    
+    .sello-size-normal .sello-replanta-img {
         width: 88px !important;
         height: 32px !important;
-        max-width: 88px !important;
-        max-height: 32px !important;
+    }
+    
+    .sello-size-large .sello-replanta-img {
+        width: 110px !important;
+        height: 40px !important;
     }
 }
 
-/* Asegurar visibilidad en cualquier tema */
-#sello-replanta-container * {
-    box-sizing: border-box !important;
+@media (max-width: 480px) {
+    .sello-position-fixed .sello-replanta-footer {
+        padding: 8px 5px !important;
+    }
 }
 
-/* Reset de estilos que podrían interferir */
+/* === ANIMATION VARIANTS === */
+@keyframes selloFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#sello-replanta-container.sello-animate {
+    animation: selloFadeIn 0.5s ease-out !important;
+}
+
+/* === THEME COMPATIBILITY === */
+
+/* Astra Theme */
+.ast-footer-bottom-inner #sello-replanta-container {
+    margin-top: 10px !important;
+}
+
+/* Genesis Theme */
+.site-footer #sello-replanta-container {
+    border-top: 1px solid #eee !important;
+    padding-top: 15px !important;
+}
+
+/* Twenty Twenty-One/Two */
+.wp-site-blocks .wp-block-group__inner-container #sello-replanta-container {
+    margin-top: 20px !important;
+}
+
+/* === ACCESSIBILITY === */
+.replanta-seal-link:focus {
+    outline: 2px solid #007cba !important;
+    outline-offset: 2px !important;
+}
+
+/* === HIGH CONTRAST MODE === */
+@media (prefers-contrast: high) {
+    #sello-replanta-container {
+        border: 1px solid currentColor !important;
+    }
+}
+
+/* === REDUCED MOTION === */
+@media (prefers-reduced-motion: reduce) {
+    .replanta-seal-link,
+    .sello-replanta-img,
+    #sello-replanta-container {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* === DARK MODE SUPPORT === */
+@media (prefers-color-scheme: dark) {
+    #sello-replanta-container:not([style*="background-color"]) {
+        background-color: #1a1a1a !important;
+    }
+}
+
+/* === PRINT STYLES === */
+@media print {
+    #sello-replanta-container {
+        display: none !important;
+    }
+}
+
+/* === RESET OVERRIDES === */
+#sello-replanta-container *,
+#sello-replanta-container *:before,
+#sello-replanta-container *:after {
+    box-sizing: border-box !important;
+    animation: none !important;
+}
+
+/* Limpiar estilos que podrían interferir */
 .sello-replanta-footer,
 .sello-replanta-wrapper,
 .replanta-seal-link,
 .sello-replanta-img {
-    animation: none !important;
     transform-origin: center !important;
+    font-family: inherit !important;
+    line-height: 1 !important;
 }

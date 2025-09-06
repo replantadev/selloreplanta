@@ -1,122 +1,284 @@
 /**
- * Sello Replanta - JavaScript mejorado para compatibilidad universal
+ * Sello Replanta PRO - JavaScript avanzado para page builders
+ * Detección inteligente de Elementor, Divi, Beaver Builder y más
  */
 (function() {
     'use strict';
 
-    // Esperar a que el DOM esté listo
-    function initSelloReplanta() {
-        var selloContainer = document.getElementById('sello-replanta-container');
-        
-        if (!selloContainer) {
-            return;
-        }
+    // Configuración PRO
+    const SelloReplantaPRO = {
+        selectors: {
+            // Elementor
+            elementor: [
+                '.elementor-location-footer',
+                '.elementor-footer-bottom',
+                '[data-elementor-type="footer"]',
+                '.elementor-widget-footer'
+            ],
+            // Divi
+            divi: [
+                '#et-footer-nav',
+                '.et_pb_section_footer',
+                '#footer-bottom',
+                '.et-db #et-main'
+            ],
+            // Beaver Builder
+            beaver: [
+                '.fl-builder-content .fl-row:last-child',
+                '.fl-page-footer-wrap'
+            ],
+            // Temas populares
+            astra: [
+                '.ast-footer-bottom-inner',
+                '.site-footer'
+            ],
+            genesis: [
+                '.site-footer'
+            ],
+            // Fallbacks generales
+            generic: [
+                'footer',
+                '.footer',
+                '#footer',
+                '[class*="footer"]',
+                'body > div:last-child',
+                'main + div',
+                '#page'
+            ]
+        },
 
-        // Aplicar color de fondo personalizado si se especifica
-        if (typeof selloReplantaData !== 'undefined' && selloReplantaData.customBgColor) {
-            selloContainer.style.backgroundColor = selloReplantaData.customBgColor;
-        } else {
-            // Detectar automáticamente el color de fondo
-            detectAndApplyBackgroundColor(selloContainer);
-        }
+        init: function() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', this.initSello.bind(this));
+            } else {
+                this.initSello();
+            }
 
-        // Insertar el sello en la posición más apropiada
-        positionSello(selloContainer);
-        
-        // Mostrar el sello
-        selloContainer.style.display = 'block';
-        selloContainer.style.visibility = 'visible';
-    }
-
-    function detectAndApplyBackgroundColor(selloContainer) {
-        try {
-            // Buscar elementos potenciales del footer
-            var footerElements = [
-                document.querySelector('footer'),
-                document.querySelector('.footer'),
-                document.querySelector('#footer'),
-                document.querySelector('[class*="footer"]'),
-                document.querySelector('body > div:last-child'),
-                document.body
-            ];
-
-            var backgroundColor = null;
+            // Fallback adicional para page builders que cargan tarde
+            window.addEventListener('load', this.fallbackInit.bind(this));
             
-            for (var i = 0; i < footerElements.length; i++) {
-                var element = footerElements[i];
+            // Detectar cambios dinámicos de Elementor
+            if (window.elementorFrontend) {
+                window.elementorFrontend.hooks.addAction('frontend/element_ready/widget', this.handleElementorWidget.bind(this));
+            }
+        },
+
+        initSello: function() {
+            const container = document.getElementById('sello-replanta-container');
+            if (!container) return;
+
+            console.log('🌱 Sello Replanta PRO - Iniciando detección inteligente');
+
+            // Obtener configuración del contenedor
+            const position = container.dataset.position || 'auto';
+            const builders = (container.dataset.builders || '').split(',').filter(Boolean);
+
+            console.log('📊 Page builders detectados:', builders);
+            console.log('📍 Posición configurada:', position);
+
+            // Aplicar color de fondo si es necesario
+            this.applyBackgroundColor(container);
+
+            // Determinar estrategia de posicionamiento
+            this.positionSello(container, position, builders);
+
+            // Mostrar con animación
+            this.showSello(container);
+        },
+
+        positionSello: function(container, position, builders) {
+            let target = null;
+            let strategy = 'append';
+
+            // Estrategias específicas según configuración
+            switch (position) {
+                case 'fixed_bottom':
+                    // Ya tiene la clase CSS, solo mostramos
+                    this.showSello(container);
+                    return;
+
+                case 'elementor_footer':
+                    target = this.findElementorFooter();
+                    break;
+
+                case 'body_end':
+                    target = document.body;
+                    break;
+
+                case 'footer_end':
+                    target = this.findGenericFooter();
+                    break;
+
+                default: // 'auto'
+                    target = this.findBestTarget(builders);
+                    break;
+            }
+
+            // Si encontramos un target, posicionar ahí
+            if (target) {
+                console.log('🎯 Target encontrado:', target.tagName, target.className);
+                this.insertIntoTarget(container, target, strategy);
+            } else {
+                console.log('⚠️ No se encontró target específico, usando body');
+                document.body.appendChild(container);
+            }
+        },
+
+        findElementorFooter: function() {
+            // Buscar footer de Elementor con múltiples estrategias
+            for (const selector of this.selectors.elementor) {
+                const element = document.querySelector(selector);
                 if (element) {
-                    var style = window.getComputedStyle(element);
-                    var bgColor = style.backgroundColor;
-                    
-                    // Verificar si el color no es transparente
-                    if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
-                        backgroundColor = bgColor;
-                        break;
-                    }
+                    console.log('✅ Footer Elementor encontrado:', selector);
+                    return element;
+                }
+            }
+            return null;
+        },
+
+        findGenericFooter: function() {
+            for (const selector of this.selectors.generic) {
+                const element = document.querySelector(selector);
+                if (element && this.isVisible(element)) {
+                    console.log('✅ Footer genérico encontrado:', selector);
+                    return element;
+                }
+            }
+            return null;
+        },
+
+        findBestTarget: function(builders) {
+            // Priorizar según page builders detectados
+            const searchOrder = [];
+
+            if (builders.includes('elementor')) {
+                searchOrder.push(...this.selectors.elementor);
+            }
+            if (builders.includes('divi')) {
+                searchOrder.push(...this.selectors.divi);
+            }
+            if (builders.includes('beaver')) {
+                searchOrder.push(...this.selectors.beaver);
+            }
+
+            // Añadir selectores de temas populares
+            searchOrder.push(...this.selectors.astra);
+            searchOrder.push(...this.selectors.genesis);
+            
+            // Fallbacks genéricos
+            searchOrder.push(...this.selectors.generic);
+
+            // Buscar el primer elemento válido
+            for (const selector of searchOrder) {
+                const element = document.querySelector(selector);
+                if (element && this.isVisible(element)) {
+                    console.log('🎯 Mejor target encontrado:', selector);
+                    return element;
                 }
             }
 
-            // Aplicar el color detectado o un color por defecto
-            if (backgroundColor) {
-                selloContainer.style.backgroundColor = backgroundColor;
-            } else {
-                // Color por defecto si no se puede detectar
-                selloContainer.style.backgroundColor = '#ffffff';
+            return document.body;
+        },
+
+        insertIntoTarget: function(container, target, strategy) {
+            try {
+                if (strategy === 'append') {
+                    target.appendChild(container);
+                } else {
+                    target.insertBefore(container, target.firstChild);
+                }
+            } catch (error) {
+                console.warn('⚠️ Error insertando sello, usando body:', error);
+                document.body.appendChild(container);
             }
-        } catch (error) {
-            console.log('Sello Replanta: Error detectando color de fondo, usando color por defecto');
-            selloContainer.style.backgroundColor = '#ffffff';
-        }
-    }
+        },
 
-    function positionSello(selloContainer) {
-        try {
-            // Estrategia 1: Buscar un footer existente
-            var footer = document.querySelector('footer') || 
-                        document.querySelector('.footer') || 
-                        document.querySelector('#footer') ||
-                        document.querySelector('[class*="footer"]');
+        applyBackgroundColor: function(container) {
+            // Si ya tiene color inline, no hacer nada
+            if (container.style.backgroundColor) return;
 
-            if (footer && footer.parentNode) {
-                footer.appendChild(selloContainer);
+            // Solo aplicar si no hay color personalizado definido
+            if (typeof selloReplantaData !== 'undefined' && selloReplantaData.customBgColor) {
+                container.style.backgroundColor = selloReplantaData.customBgColor;
                 return;
             }
 
-            // Estrategia 2: Añadir al final del body
-            if (document.body) {
-                document.body.appendChild(selloContainer);
-                return;
-            }
+            // Detectar color automáticamente
+            this.detectAndApplyBackgroundColor(container);
+        },
 
-            // Estrategia 3: Añadir antes del cierre del HTML
-            var lastDiv = document.querySelector('body > div:last-child');
-            if (lastDiv && lastDiv.parentNode) {
-                lastDiv.parentNode.insertBefore(selloContainer, lastDiv.nextSibling);
-                return;
-            }
+        detectAndApplyBackgroundColor: function(container) {
+            try {
+                // Buscar elementos de referencia para el color
+                const referenceElements = [
+                    document.querySelector('.elementor-location-footer'),
+                    document.querySelector('footer'),
+                    document.querySelector('.footer'),
+                    document.querySelector('#footer'),
+                    document.body
+                ];
 
-        } catch (error) {
-            console.log('Sello Replanta: Error posicionando el sello, usando posición por defecto');
-            // Último recurso: añadir al body
-            if (document.body) {
-                document.body.appendChild(selloContainer);
+                let backgroundColor = null;
+                
+                for (const element of referenceElements) {
+                    if (element) {
+                        const style = window.getComputedStyle(element);
+                        const bgColor = style.backgroundColor;
+                        
+                        if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+                            backgroundColor = bgColor;
+                            console.log('🎨 Color detectado desde:', element.tagName, bgColor);
+                            break;
+                        }
+                    }
+                }
+
+                // Aplicar color detectado o usar por defecto
+                container.style.backgroundColor = backgroundColor || '#ffffff';
+                
+            } catch (error) {
+                console.warn('⚠️ Error detectando color, usando blanco:', error);
+                container.style.backgroundColor = '#ffffff';
+            }
+        },
+
+        showSello: function(container) {
+            // Mostrar con animación suave
+            container.style.display = 'block';
+            container.style.visibility = 'visible';
+            container.classList.add('sello-animate');
+
+            console.log('✅ Sello Replanta PRO mostrado correctamente');
+        },
+
+        isVisible: function(element) {
+            if (!element) return false;
+            const style = window.getComputedStyle(element);
+            return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+        },
+
+        fallbackInit: function() {
+            const container = document.getElementById('sello-replanta-container');
+            if (container && (container.style.display === 'none' || !container.parentNode)) {
+                console.log('🔄 Ejecutando fallback de inicialización');
+                this.initSello();
+            }
+        },
+
+        handleElementorWidget: function(widget) {
+            // Manejar widgets de Elementor que se cargan dinámicamente
+            if (widget && widget.closest('.elementor-location-footer')) {
+                setTimeout(() => {
+                    this.fallbackInit();
+                }, 100);
             }
         }
-    }
+    };
 
-    // Múltiples puntos de entrada para asegurar la inicialización
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initSelloReplanta);
-    } else {
-        initSelloReplanta();
-    }
+    // Inicializar cuando el script se carga
+    SelloReplantaPRO.init();
 
-    // Fallback adicional
-    window.addEventListener('load', function() {
-        var selloContainer = document.getElementById('sello-replanta-container');
-        if (selloContainer && selloContainer.style.display === 'none') {
-            initSelloReplanta();
-        }
-    });
+    // Exponer para debugging
+    window.SelloReplantaPRO = SelloReplantaPRO;
 
 })();

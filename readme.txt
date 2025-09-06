@@ -1,17 +1,34 @@
-=== Sello Replanta ===
+=== Sello Replanta PRO ===
 Contributors: replantadev
-Tags: footer, sello, ecológico, carbono negativo
+Tags: footer, sello, ecológico, carbono negativo, elementor, page builder
 Requires at least: 5.0
 Tested up to: 6.8.1
-Stable tag: 1.0.20
+Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Añade un sello de carbono negativo en el footer del sitio web si está alojado en Replanta.
+Sello de carbono negativo PRO con detección inteligente de Elementor y otros page builders.
 
 == Description ==
 
-Este plugin añade un sello de carbono negativo en el footer del sitio web si el dominio está alojado en Replanta. Puedes elegir entre un modo claro u oscuro para el sello y configurar un color de fondo personalizado.
+**Sello Replanta PRO** es la versión profesional que añade automáticamente un distintivo de hosting ecológico a tu sitio web. 
+
+🚀 **NUEVA VERSIÓN PRO 2.0.0** con detección inteligente de page builders:
+
+✅ **Elementor**: Detecta automáticamente `.elementor-location-footer` y se integra perfectamente
+✅ **Divi**: Soporte nativo para footer de Divi
+✅ **Beaver Builder**: Integración optimizada
+✅ **Configuración avanzada**: 5 opciones de posicionamiento, 3 tamaños, control de opacidad
+✅ **Posicionamiento inteligente**: Detecta automáticamente la mejor ubicación
+
+= Características PRO =
+* Detección automática de page builders activos
+* Múltiples opciones de posicionamiento
+* Tres tamaños de sello (pequeño, normal, grande)
+* Control de opacidad personalizable
+* Posición fija opcional
+* CSS optimizado para cada page builder
+* JavaScript inteligente con logging detallado
 
 == Installation ==
 
@@ -25,6 +42,16 @@ Este plugin añade un sello de carbono negativo en el footer del sitio web si el
 El plugin detectará automáticamente el color de fondo del último elemento visible del footer.
 
 == Changelog ==
+
+= 2.0.0 =
+* 🚀 **VERSIÓN PRO**: Detección inteligente de page builders
+* ✅ **ELEMENTOR**: Soporte específico para .elementor-location-footer
+* ✅ **CONFIGURACIÓN AVANZADA**: 5 opciones de posición, 3 tamaños, opacidad
+* ✅ **PAGE BUILDERS**: Soporte para Divi, Beaver Builder, Visual Composer
+* ✅ **JAVASCRIPT PRO**: Sistema de detección completamente reescrito
+* ✅ **CSS AVANZADO**: Estilos específicos para cada page builder
+* ✅ **POSICIONAMIENTO**: Múltiples estrategias automáticas
+* ✅ **LOGGING**: Sistema de debug detallado
 
 = 1.0.20 =
 * CORREGIDO: Problema principal donde el sello no se mostraba en algunos temas
@@ -46,5 +73,5 @@ El plugin detectará automáticamente el color de fondo del último elemento vis
 
 == Upgrade Notice ==
 
-= 1.0.20 =
-Actualización crítica que corrige problemas de visualización en múltiples temas. Se recomienda actualizar inmediatamente para asegurar que el sello se muestre correctamente.
+= 2.0.0 =
+🚀 VERSIÓN PRO DISPONIBLE: Detección inteligente de Elementor y page builders. Configuración avanzada con múltiples opciones. Actualización altamente recomendada para usuarios de Elementor.
