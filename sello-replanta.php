@@ -3,13 +3,14 @@
 /**
  * Plugin Name: Sello Replanta PRO
  * Description: Sello de carbono negativo inteligente que se adapta a cualquier page builder (Elementor, Divi, etc.). Versión PRO con detección avanzada.
- * Version: 2.0.0
+ * Version: 2.0.1
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: sello-replanta
- * Domain Path: /languages
+ * Domain Path: /langu    // Generar el HTML del sello con configuración PRO
+    echo '<div id="sello-replanta-container" class="' . esc_attr($positioning_class) . ' sello-size-' . esc_attr($size) . ' sello-zindex-' . esc_attr($zindex) . '"' . $style_attr . ' data-position="' . esc_attr($position) . '" data-builders="' . esc_attr(implode(',', $page_builders)) . '" data-zindex="' . esc_attr($zindex_value) . '" data-margin="' . esc_attr($margin) . '">';es
  * GitHub Plugin URI: https://github.com/replantadev/selloreplanta
  */
 
@@ -20,7 +21,7 @@ if (!defined('ABSPATH')) {
 
 define('SR_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('SR_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('SR_VERSION', '2.0.0');
+define('SR_VERSION', '2.0.1');
 
 // Detectar page builders activos
 add_action('init', 'sello_replanta_detect_page_builders');
@@ -169,6 +170,8 @@ function sello_replanta_settings()
     add_settings_field('sello_replanta_position', 'Posición', 'sello_replanta_setting_position', 'sello-replanta', 'sello_replanta_main');
     add_settings_field('sello_replanta_size', 'Tamaño', 'sello_replanta_setting_size', 'sello-replanta', 'sello_replanta_main');
     add_settings_field('sello_replanta_opacity', 'Opacidad', 'sello_replanta_setting_opacity', 'sello-replanta', 'sello_replanta_main');
+    add_settings_field('sello_replanta_zindex', 'Z-Index (Conflictos)', 'sello_replanta_setting_zindex', 'sello-replanta', 'sello_replanta_main');
+    add_settings_field('sello_replanta_margin', 'Margen Inferior', 'sello_replanta_setting_margin', 'sello-replanta', 'sello_replanta_main');
 }
 
 function sello_replanta_section_text()
@@ -237,6 +240,29 @@ function sello_replanta_setting_opacity()
     </script>";
 }
 
+function sello_replanta_setting_zindex()
+{
+    $options = get_option('sello_replanta_options');
+    $zindex = isset($options['zindex']) ? $options['zindex'] : 'auto';
+    echo "<select id='sello_replanta_zindex' name='sello_replanta_options[zindex]'>
+            <option value='auto'" . selected($zindex, 'auto', false) . ">Automático (9999)</option>
+            <option value='low'" . selected($zindex, 'low', false) . ">Bajo (100) - Debajo de chats</option>
+            <option value='medium'" . selected($zindex, 'medium', false) . ">Medio (1000)</option>
+            <option value='high'" . selected($zindex, 'high', false) . ">Alto (9999)</option>
+            <option value='higher'" . selected($zindex, 'higher', false) . ">Muy Alto (99999)</option>
+          </select>";
+    echo "<p class='description'>Controla si el sello aparece por encima o debajo de chats y otros elementos flotantes.</p>";
+}
+
+function sello_replanta_setting_margin()
+{
+    $options = get_option('sello_replanta_options');
+    $margin = isset($options['margin']) ? $options['margin'] : '0';
+    echo "<input type='number' id='sello_replanta_margin' name='sello_replanta_options[margin]' value='" . esc_attr($margin) . "' min='0' max='200' step='5' />";
+    echo " px";
+    echo "<p class='description'>Añade margen inferior para evitar conflictos con chats flotantes (recomendado: 60-80px si tienes problemas).</p>";
+}
+
 function sello_replanta_options_validate($input)
 {
     $newinput = array();
@@ -248,6 +274,10 @@ function sello_replanta_options_validate($input)
         ? sanitize_text_field($input['size']) : 'normal';
     $newinput['opacity'] = floatval($input['opacity']) >= 0.3 && floatval($input['opacity']) <= 1.0 
         ? floatval($input['opacity']) : 1.0;
+    $newinput['zindex'] = in_array($input['zindex'], ['auto', 'low', 'medium', 'high', 'higher']) 
+        ? sanitize_text_field($input['zindex']) : 'auto';
+    $newinput['margin'] = intval($input['margin']) >= 0 && intval($input['margin']) <= 200 
+        ? intval($input['margin']) : 0;
     return $newinput;
 }
 
@@ -307,6 +337,8 @@ function sello_replanta_display_badge()
     $position = isset($options['position']) ? $options['position'] : 'auto';
     $size = isset($options['size']) ? $options['size'] : 'normal';
     $opacity = isset($options['opacity']) ? $options['opacity'] : 1.0;
+    $zindex = isset($options['zindex']) ? $options['zindex'] : 'auto';
+    $margin = isset($options['margin']) ? $options['margin'] : 0;
 
     // Configurar tamaños según la opción
     $sizes = array(
@@ -323,6 +355,26 @@ function sello_replanta_display_badge()
     // Detectar page builders para posicionamiento inteligente
     $page_builders = get_option('sello_replanta_page_builders', array());
     
+    // Determinar z-index según configuración
+    $zindex_value = 9999; // Por defecto
+    switch ($zindex) {
+        case 'low':
+            $zindex_value = 100;
+            break;
+        case 'medium':
+            $zindex_value = 1000;
+            break;
+        case 'high':
+            $zindex_value = 9999;
+            break;
+        case 'higher':
+            $zindex_value = 99999;
+            break;
+        default: // 'auto'
+            $zindex_value = 9999;
+            break;
+    }
+
     // Determinar la estrategia de posicionamiento
     $positioning_class = 'sello-position-auto';
     if ($position === 'fixed_bottom') {
@@ -341,6 +393,12 @@ function sello_replanta_display_badge()
     if ($opacity < 1.0) {
         $inline_styles[] = 'opacity: ' . esc_attr($opacity);
     }
+    if ($margin > 0) {
+        $inline_styles[] = 'margin-bottom: ' . esc_attr($margin) . 'px';
+    }
+    // Aplicar z-index personalizado
+    $inline_styles[] = 'z-index: ' . esc_attr($zindex_value);
+    
     $style_attr = !empty($inline_styles) ? ' style="' . implode('; ', $inline_styles) . ';"' : '';
 
     // Generar el HTML del sello con configuración PRO

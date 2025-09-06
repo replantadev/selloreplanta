@@ -67,14 +67,21 @@
             const container = document.getElementById('sello-replanta-container');
             if (!container) return;
 
-            console.log('🌱 Sello Replanta PRO - Iniciando detección inteligente');
+            console.log('🌱 Sello Replanta PRO v2.0.1 - Iniciando detección inteligente');
 
             // Obtener configuración del contenedor
             const position = container.dataset.position || 'auto';
             const builders = (container.dataset.builders || '').split(',').filter(Boolean);
+            const zindexValue = container.dataset.zindex || '9999';
+            const margin = container.dataset.margin || '0';
 
             console.log('📊 Page builders detectados:', builders);
             console.log('📍 Posición configurada:', position);
+            console.log('🔢 Z-index configurado:', zindexValue);
+            console.log('📏 Margen inferior:', margin + 'px');
+
+            // Detectar conflictos con chats y otros plugins
+            this.detectAndFixConflicts(container);
 
             // Aplicar color de fondo si es necesario
             this.applyBackgroundColor(container);
@@ -84,6 +91,51 @@
 
             // Mostrar con animación
             this.showSello(container);
+        },
+
+        detectAndFixConflicts: function(container) {
+            const chatSelectors = [
+                '.crisp-client',           // Crisp
+                '#intercom-frame',         // Intercom
+                '.zEWidget-launcher',      // Zendesk
+                '#tawk_5',                 // Tawk.to
+                '.lc_cta',                 // LiveChat
+                '[class*="whatsapp"]',     // WhatsApp buttons
+                '[id*="whatsapp"]',
+                '.floating-button',        // Generic floating
+                '.float-button'
+            ];
+
+            let chatDetected = false;
+            const detectedChats = [];
+
+            for (const selector of chatSelectors) {
+                if (document.querySelector(selector)) {
+                    chatDetected = true;
+                    detectedChats.push(selector);
+                }
+            }
+
+            if (chatDetected) {
+                console.log('💬 Chats detectados:', detectedChats);
+                
+                // Si el z-index es automático y hay chats, bajarlo
+                const zindexClass = container.className.match(/sello-zindex-(\w+)/);
+                if (zindexClass && zindexClass[1] === 'auto') {
+                    console.log('🔧 Ajustando z-index automáticamente para evitar conflictos con chats');
+                    container.style.zIndex = '99';
+                }
+
+                // Añadir margen adicional si no está configurado
+                const currentMargin = parseInt(container.dataset.margin || '0');
+                if (currentMargin === 0) {
+                    console.log('📏 Añadiendo margen automático para chats');
+                    container.style.marginBottom = '70px';
+                }
+
+                // Añadir clase especial para chats
+                container.classList.add('sello-chat-friendly');
+            }
         },
 
         positionSello: function(container, position, builders) {

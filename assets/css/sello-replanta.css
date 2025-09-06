@@ -72,7 +72,84 @@
     max-height: 48px !important;
 }
 
-/* === POSITIONING STRATEGIES === */
+/* === Z-INDEX CONTROL === */
+.sello-zindex-auto {
+    z-index: 9999 !important;
+}
+
+.sello-zindex-low {
+    z-index: 100 !important;
+}
+
+.sello-zindex-medium {
+    z-index: 1000 !important;
+}
+
+.sello-zindex-high {
+    z-index: 9999 !important;
+}
+
+.sello-zindex-higher {
+    z-index: 99999 !important;
+}
+
+/* === COMPATIBILIDAD CON CHATS === */
+
+/* Crisp Chat */
+body:has(.crisp-client) .sello-zindex-auto {
+    z-index: 99 !important; /* Crisp usa z-index: 1000000 */
+}
+
+/* Intercom */
+body:has(#intercom-frame) .sello-zindex-auto {
+    z-index: 99 !important; /* Intercom usa z-index alto */
+}
+
+/* Zendesk Chat */
+body:has(.zEWidget-launcher) .sello-zindex-auto {
+    z-index: 99 !important;
+}
+
+/* Tawk.to */
+body:has(#tawk_5) .sello-zindex-auto {
+    z-index: 99 !important;
+}
+
+/* LiveChat */
+body:has(.lc_cta) .sello-zindex-auto {
+    z-index: 99 !important;
+}
+
+/* WhatsApp Floating Buttons */
+body:has([class*="whatsapp"]) .sello-zindex-auto,
+body:has([id*="whatsapp"]) .sello-zindex-auto {
+    z-index: 99 !important;
+}
+
+/* Floating Action Buttons genéricos */
+body:has(.floating-button) .sello-zindex-auto,
+body:has(.float-button) .sello-zindex-auto,
+body:has([class*="floating"]) .sello-zindex-auto {
+    z-index: 99 !important;
+}
+
+/* === COMPATIBILIDAD ESPECÍFICA CON CHATS === */
+.sello-chat-friendly {
+    margin-bottom: 70px !important;
+    z-index: 99 !important;
+    position: relative !important;
+}
+
+.sello-chat-friendly.sello-position-fixed {
+    bottom: 70px !important; /* Espacio para chats flotantes */
+}
+
+/* === MARGIN BOTTOM SUPPORT === */
+#sello-replanta-container[data-margin] {
+    margin-bottom: var(--sello-margin, 0px) !important;
+}
+
+/* === MEJOR POSICIONAMIENTO === */
 
 /* Posición automática - default */
 .sello-position-auto {

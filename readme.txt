@@ -3,7 +3,7 @@ Contributors: replantadev
 Tags: footer, sello, ecológico, carbono negativo, elementor, page builder
 Requires at least: 5.0
 Tested up to: 6.8.1
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,6 +43,14 @@ El plugin detectará automáticamente el color de fondo del último elemento vis
 
 == Changelog ==
 
+= 2.0.1 =
+* 🚨 **PROBLEMA RESUELTO**: Conflictos con chats como Crisp, Intercom, WhatsApp
+* ✅ **DETECCIÓN AUTOMÁTICA**: Detecta plugins de chat y ajusta automáticamente
+* ✅ **CONTROL Z-INDEX**: 5 niveles de z-index (Bajo, Medio, Alto, Muy Alto)
+* ✅ **MARGEN PERSONALIZABLE**: Configuración de margen inferior (0-200px)
+* ✅ **COMPATIBILIDAD TOTAL**: Crisp, Intercom, Zendesk, Tawk.to, LiveChat, WhatsApp
+* ✅ **AUTO-AJUSTE**: Se posiciona automáticamente debajo de chats cuando los detecta
+
 = 2.0.0 =
 * 🚀 **VERSIÓN PRO**: Detección inteligente de page builders
 * ✅ **ELEMENTOR**: Soporte específico para .elementor-location-footer
@@ -73,5 +81,5 @@ El plugin detectará automáticamente el color de fondo del último elemento vis
 
 == Upgrade Notice ==
 
-= 2.0.0 =
-🚀 VERSIÓN PRO DISPONIBLE: Detección inteligente de Elementor y page builders. Configuración avanzada con múltiples opciones. Actualización altamente recomendada para usuarios de Elementor.
+= 2.0.1 =
+� ACTUALIZACIÓN CRÍTICA para sitios con chat: Resuelve conflictos con Crisp, Intercom y otros chats. El sello ahora se posiciona automáticamente sin interferir con chats flotantes.

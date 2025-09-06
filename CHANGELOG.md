@@ -1,5 +1,40 @@
 # Changelog - Sello Replanta
 
+## [2.0.1] - 2025-09-07 🔧 COMPATIBILIDAD CON CHATS
+
+### 🚨 PROBLEMA RESUELTO: Conflictos con Chats
+- **CORREGIDO**: Sello aparecía por encima de chats como Crisp, Intercom, WhatsApp
+- **AÑADIDO**: Detección automática de plugins de chat populares
+- **AÑADIDO**: Ajuste automático de z-index cuando se detectan chats
+- **AÑADIDO**: Margen inferior automático para evitar solapamientos
+
+### ⚙️ NUEVAS CONFIGURACIONES PRO
+- **AÑADIDO**: Control de Z-Index (Bajo, Medio, Alto, Muy Alto)
+- **AÑADIDO**: Configuración de margen inferior personalizable
+- **AÑADIDO**: Opción "Bajo" que coloca el sello debajo de chats automáticamente
+
+### 🔧 DETECCIÓN INTELIGENTE DE CHATS
+- **✅ Crisp Chat**: Detectado y compatible
+- **✅ Intercom**: Detectado y compatible  
+- **✅ Zendesk Chat**: Detectado y compatible
+- **✅ Tawk.to**: Detectado y compatible
+- **✅ LiveChat**: Detectado y compatible
+- **✅ WhatsApp Floating**: Detectado y compatible
+- **✅ Botones flotantes genéricos**: Detectados
+
+### 📱 CONFIGURACIÓN RECOMENDADA
+- **Para sitios con chat**: Z-Index "Bajo" + Margen 70px
+- **Para sitios sin chat**: Z-Index "Automático" + Margen 0px
+- **Detección automática**: El plugin ajusta automáticamente si detecta conflictos
+
+### 🎯 MEJORAS TÉCNICAS
+- Logging mejorado con información de conflictos detectados
+- CSS específico para compatibilidad con chats
+- Clase `.sello-chat-friendly` automática
+- Ajustes dinámicos de posicionamiento
+
+---
+
 ## [2.0.0] - 2025-09-07 🚀 VERSIÓN PRO
 
 ### 🌟 NUEVA VERSIÓN PRO
