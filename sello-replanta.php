@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Sello Replanta PRO
  * Description: Sello de carbono negativo inteligente que se adapta a cualquier page builder (Elementor, Divi, etc.). Versión PRO con detección avanzada.
- * Version: 2.0.1
+ * Version: 2.0.2
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2

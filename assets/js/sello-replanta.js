@@ -8,6 +8,17 @@
     // Configuración PRO
     const SelloReplantaPRO = {
         selectors: {
+            // Footers de temas (MÁXIMA PRIORIDAD)
+            themeFooters: [
+                '#colophon',               // Astra Theme
+                '.ast-footer-wrap',        // Astra variants
+                '.site-footer',            // GeneratePress, Astra
+                '.site-info',              // Twenty themes
+                '#site-footer',            // Generic theme footer
+                '.footer-bottom',          // OceanWP
+                '.footer-widgets',         // Various themes
+                '[role="contentinfo"]'     // Semantic footer
+            ],
             // Elementor
             elementor: [
                 '.elementor-location-footer',
@@ -27,15 +38,7 @@
                 '.fl-builder-content .fl-row:last-child',
                 '.fl-page-footer-wrap'
             ],
-            // Temas populares
-            astra: [
-                '.ast-footer-bottom-inner',
-                '.site-footer'
-            ],
-            genesis: [
-                '.site-footer'
-            ],
-            // Fallbacks generales
+            // Fallbacks generales (BAJA PRIORIDAD)
             generic: [
                 'footer',
                 '.footer',
@@ -139,8 +142,7 @@
         },
 
         positionSello: function(container, position, builders) {
-            let target = null;
-            let strategy = 'append';
+            let targetInfo = null;
 
             // Estrategias específicas según configuración
             switch (position) {
@@ -150,26 +152,27 @@
                     return;
 
                 case 'elementor_footer':
-                    target = this.findElementorFooter();
+                    targetInfo = this.findElementorFooter();
                     break;
 
                 case 'body_end':
-                    target = document.body;
+                    targetInfo = { element: document.body, strategy: 'append' };
                     break;
 
                 case 'footer_end':
-                    target = this.findGenericFooter();
+                    targetInfo = this.findGenericFooter();
                     break;
 
                 default: // 'auto'
-                    target = this.findBestTarget(builders);
+                    targetInfo = this.findBestTarget(builders);
                     break;
             }
 
             // Si encontramos un target, posicionar ahí
-            if (target) {
-                console.log('🎯 Target encontrado:', target.tagName, target.className);
-                this.insertIntoTarget(container, target, strategy);
+            if (targetInfo && targetInfo.element) {
+                console.log('🎯 Target encontrado:', targetInfo.element.tagName, targetInfo.element.className || targetInfo.element.id);
+                console.log('📍 Estrategia de inserción:', targetInfo.strategy);
+                this.insertIntoTarget(container, targetInfo.element, targetInfo.strategy);
             } else {
                 console.log('⚠️ No se encontró target específico, usando body');
                 document.body.appendChild(container);
@@ -182,25 +185,48 @@
                 const element = document.querySelector(selector);
                 if (element) {
                     console.log('✅ Footer Elementor encontrado:', selector);
-                    return element;
+                    return { element: element, strategy: 'after' };
                 }
             }
             return null;
         },
 
         findGenericFooter: function() {
+            // Primero intentar con footers de temas
+            for (const selector of this.selectors.themeFooters) {
+                const element = document.querySelector(selector);
+                if (element && this.isVisible(element)) {
+                    console.log('✅ Footer de tema encontrado:', selector);
+                    return { element: element, strategy: 'after' };
+                }
+            }
+            
+            // Fallback a footers genéricos
             for (const selector of this.selectors.generic) {
                 const element = document.querySelector(selector);
                 if (element && this.isVisible(element)) {
                     console.log('✅ Footer genérico encontrado:', selector);
-                    return element;
+                    return { element: element, strategy: 'after' };
                 }
             }
             return null;
         },
 
         findBestTarget: function(builders) {
-            // Priorizar según page builders detectados
+            console.log('🔍 Buscando mejor target para inserción...');
+            
+            // PASO 1: PRIORIDAD MÁXIMA - Buscar footers de temas
+            console.log('🎯 Paso 1: Buscando footers de temas (Astra, GeneratePress, etc.)');
+            for (const selector of this.selectors.themeFooters) {
+                const element = document.querySelector(selector);
+                if (element && this.isVisible(element)) {
+                    console.log('✅ Footer de tema encontrado:', selector);
+                    return { element: element, strategy: 'after' };
+                }
+            }
+
+            // PASO 2: Buscar footers de page builders específicos
+            console.log('🎯 Paso 2: Buscando footers de page builders');
             const searchOrder = [];
 
             if (builders.includes('elementor')) {
@@ -213,31 +239,56 @@
                 searchOrder.push(...this.selectors.beaver);
             }
 
-            // Añadir selectores de temas populares
-            searchOrder.push(...this.selectors.astra);
-            searchOrder.push(...this.selectors.genesis);
-            
-            // Fallbacks genéricos
-            searchOrder.push(...this.selectors.generic);
-
-            // Buscar el primer elemento válido
             for (const selector of searchOrder) {
                 const element = document.querySelector(selector);
                 if (element && this.isVisible(element)) {
-                    console.log('🎯 Mejor target encontrado:', selector);
-                    return element;
+                    console.log('✅ Footer de page builder encontrado:', selector);
+                    return { element: element, strategy: 'after' };
+                }
+            }
+            
+            // PASO 3: Fallbacks genéricos
+            console.log('🎯 Paso 3: Buscando fallbacks genéricos');
+            for (const selector of this.selectors.generic) {
+                const element = document.querySelector(selector);
+                if (element && this.isVisible(element)) {
+                    console.log('✅ Fallback encontrado:', selector);
+                    return { element: element, strategy: 'append' };
                 }
             }
 
-            return document.body;
+            console.log('⚠️ No se encontró target específico, usando body');
+            return { element: document.body, strategy: 'append' };
         },
 
         insertIntoTarget: function(container, target, strategy) {
             try {
-                if (strategy === 'append') {
-                    target.appendChild(container);
-                } else {
-                    target.insertBefore(container, target.firstChild);
+                switch (strategy) {
+                    case 'after':
+                        // Insertar DESPUÉS del elemento (ideal para footers)
+                        if (target.nextSibling) {
+                            target.parentNode.insertBefore(container, target.nextSibling);
+                        } else {
+                            target.parentNode.appendChild(container);
+                        }
+                        console.log('✅ Sello insertado DESPUÉS de:', target.tagName, target.className || target.id);
+                        break;
+                        
+                    case 'append':
+                        // Insertar DENTRO del elemento al final
+                        target.appendChild(container);
+                        console.log('✅ Sello insertado DENTRO de:', target.tagName, target.className || target.id);
+                        break;
+                        
+                    case 'prepend':
+                        // Insertar DENTRO del elemento al principio
+                        target.insertBefore(container, target.firstChild);
+                        console.log('✅ Sello insertado AL PRINCIPIO de:', target.tagName, target.className || target.id);
+                        break;
+                        
+                    default:
+                        target.appendChild(container);
+                        break;
                 }
             } catch (error) {
                 console.warn('⚠️ Error insertando sello, usando body:', error);

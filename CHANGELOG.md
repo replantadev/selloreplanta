@@ -1,5 +1,25 @@
 # Changelog - Sello Replanta
 
+## [2.0.2] - 2025-09-07 🎯 BEAVER BUILDER + ASTRA FIX
+
+### 🚨 PROBLEMA RESUELTO: Posicionamiento en Beaver + Astra
+- **CORREGIDO**: Sello aparece ahora DESPUÉS del footer de Astra (#colophon) en sitios con Beaver Builder
+- **MEJORADO**: Prioridad de inserción: Footers de tema → Page builders → Fallbacks
+- **AÑADIDO**: Detección específica de footers de temas populares (Astra, GeneratePress, etc.)
+- **MEJORADO**: Estrategias de inserción: 'after', 'append', 'prepend' para posicionamiento preciso
+
+### 🏗️ Mejoras en Detección de Temas
+- **AÑADIDO**: Selectores específicos para Astra Theme (#colophon, .ast-footer-wrap)
+- **AÑADIDO**: Soporte mejorado para Twenty themes (.site-info)
+- **AÑADIDO**: Detección de footers semánticos ([role="contentinfo"])
+- **MEJORADO**: Logging detallado del proceso de inserción
+
+### 🔍 Lógica de Posicionamiento Mejorada
+- **MEJORADO**: Búsqueda en 3 pasos: Temas → Page Builders → Fallbacks
+- **MEJORADO**: Estrategia 'after' para insertar DESPUÉS de footers
+- **OPTIMIZADO**: Mejor detección de elementos visibles
+- **AÑADIDO**: Información detallada en consola sobre estrategias de inserción
+
 ## [2.0.1] - 2025-09-07 🔧 COMPATIBILIDAD CON CHATS
 
 ### 🚨 PROBLEMA RESUELTO: Conflictos con Chats
