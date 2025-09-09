@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="tiny" version="1.2" viewBox="0 0 512 96">
+  <!-- Generator: Adobe Illustrator 28.6.0, SVG Export Plug-In . SVG Version: 1.2.0 Build 709)  -->
+  <g>
+    <g id="Layer_1">
+      <g id="Trustpilot_ratings_4halfstar-RGB">
+        <g>
+          <rect id="Rectangle-path" width="96" height="96" fill="#00b67a"/>
+          <rect x="104" width="96" height="96" fill="#00b67a"/>
+          <rect x="208" width="96" height="96" fill="#00b67a"/>
+          <rect x="312" width="96" height="96" fill="#00b67a"/>
+          <g id="Half">
+            <rect x="464" width="48" height="96" fill="#dcdce6"/>
+            <rect x="416" width="48" height="96" fill="#00b67a"/>
+          </g>
+          <path id="Shape" d="M48,64.7l14.6-3.7,6.1,18.8-20.7-15.1ZM81.6,40.4h-25.7l-7.9-24.2-7.9,24.2H14.4l20.8,15-7.9,24.2,20.8-15,12.8-9.2,20.7-15h0Z" fill="#fff"/>
+          <path d="M152,64.7l14.6-3.7,6.1,18.8-20.7-15.1ZM185.6,40.4h-25.7l-7.9-24.2-7.9,24.2h-25.7l20.8,15-7.9,24.2,20.8-15,12.8-9.2,20.7-15h0Z" fill="#fff"/>
+          <path d="M256,64.7l14.6-3.7,6.1,18.8-20.7-15.1ZM289.6,40.4h-25.7l-7.9-24.2-7.9,24.2h-25.7l20.8,15-7.9,24.2,20.8-15,12.8-9.2,20.7-15h0Z" fill="#fff"/>
+          <path d="M360,64.7l14.6-3.7,6.1,18.8-20.7-15.1ZM393.6,40.4h-25.7l-7.9-24.2-7.9,24.2h-25.7l20.8,15-7.9,24.2,20.8-15,12.8-9.2,20.7-15h0Z" fill="#fff"/>
+          <path d="M464,64.7l14.6-3.7,6.1,18.8-20.7-15.1ZM497.6,40.4h-25.7l-7.9-24.2-7.9,24.2h-25.7l20.8,15-7.9,24.2,20.8-15,12.8-9.2,20.7-15h0Z" fill="#fff"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

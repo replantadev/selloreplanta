@@ -1,0 +1,34 @@
+# Ignores for WordPress Development Environment
+
+# WordPress Core Files
+app/public/wp-admin/
+app/public/wp-includes/
+app/public/wp-*.php
+app/public/*.php
+app/public/*.html
+app/public/*.txt
+
+# Configuration Files
+conf/
+logs/
+
+# Local Environment
+*.local
+.env
+
+# Git repositories (we manage them separately)
+dniwoo/.git/
+plugins/.git/
+
+# WordPress uploads and cache
+app/public/wp-content/uploads/
+app/public/wp-content/cache/
+app/public/wp-content/backup*/
+
+# Database files
+*.sql
+*.db
+
+# Temporary files
+*.tmp
+*.log

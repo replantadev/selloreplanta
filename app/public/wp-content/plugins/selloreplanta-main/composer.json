@@ -1,0 +1,23 @@
+{
+    "name": "replantadev/sello-replanta",
+    "description": "Plugin Sello Replanta para WordPress",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Replanta",
+            "email": "support@replanta.net"
+        }
+    ],
+    "require": {
+        "yahnis-elsts/plugin-update-checker": "v5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "SelloReplanta\\": "src/"
+        }
+    },
+    "extra": {
+        "unique-key": "sello-replanta-"
+    }
+}
