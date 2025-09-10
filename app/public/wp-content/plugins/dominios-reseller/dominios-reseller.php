@@ -61,10 +61,35 @@ function dominios_reseller_admin_page() {
     echo '<h1>Certificación de Dominios Ecológicos</h1>';
     echo '<p>Configuración del plugin y gestión de dominios certificados.</p>';
 
+    // Manejar test de conexión
+    if (isset($_POST['test_whm_connection'])) {
+        $options = get_option('dominios_reseller_options');
+        $token = $options['whm_token'] ?? '';
+        
+        if (empty($token)) {
+            echo '<div class="notice notice-error"><p>❌ Error: Debes configurar primero el API Token de WHM.</p></div>';
+        } else {
+            echo '<div class="notice notice-info"><p>🔄 Probando conexión con WHM...</p></div>';
+            $test_result = test_whm_connection($token);
+            
+            if ($test_result['success']) {
+                echo '<div class="notice notice-success"><p>✅ Conexión exitosa! Se encontraron ' . $test_result['count'] . ' cuentas en WHM.</p></div>';
+            } else {
+                echo '<div class="notice notice-error"><p>❌ Error de conexión: ' . esc_html($test_result['error']) . '</p></div>';
+            }
+        }
+    }
+
     echo '<form method="post" action="options.php">';
     settings_fields('dominios_reseller_options_group');
     do_settings_sections('dominios-reseller');
     submit_button('Guardar ajustes');
+    echo '</form>';
+
+    // Botón de prueba de conexión
+    echo '<form method="post" style="margin-top: 10px;">';
+    echo '<input type="hidden" name="test_whm_connection" value="1">';
+    submit_button('🔧 Probar Conexión WHM', 'secondary', 'test_connection');
     echo '</form>';
 
     echo '<hr>';
@@ -78,17 +103,80 @@ add_action('admin_init', function () {
     register_setting('dominios_reseller_options_group', 'dominios_reseller_options', 'dominios_reseller_validate_options');
     add_settings_section('dominios_reseller_main', 'Configuración WHM', function () {
         echo '<p>Introduce tu API Token para obtener los dominios desde WHM.</p>';
+        echo '<p><strong>Servidor WHM:</strong> 77.95.113.38:2087 (IP directa)</p>';
+        echo '<p><em>El token debe tener permisos para listar cuentas (listaccts).</em></p>';
     }, 'dominios-reseller');
 
-    add_settings_field('whm_token', 'API Token', function () {
+    add_settings_field('whm_token', 'API Token WHM', function () {
         $opts = get_option('dominios_reseller_options');
         $token = isset($opts['whm_token']) ? esc_attr($opts['whm_token']) : '';
-        echo "<input type='password' name='dominios_reseller_options[whm_token]' value='$token' class='regular-text' autocomplete='off'>";
+        echo "<input type='password' name='dominios_reseller_options[whm_token]' value='$token' class='regular-text' autocomplete='off' placeholder='Introduce tu token WHM aquí...'>";
+        echo "<p class='description'>Token de autenticación para acceder a la API de WHM</p>";
     }, 'dominios-reseller', 'dominios_reseller_main');
 });
 
 function dominios_reseller_validate_options($input) {
     return [
         'whm_token' => sanitize_text_field($input['whm_token'] ?? '')
+    ];
+}
+
+// Función para probar conexión WHM
+function test_whm_connection($token) {
+    if (empty($token)) {
+        return [
+            'success' => false,
+            'error' => 'Token WHM no configurado'
+        ];
+    }
+
+    // Usar la IP directa para evitar problemas con Cloudflare
+    $whm_url = 'https://77.95.113.38:2087/json-api/listaccts?api.version=1';
+
+    $response = wp_remote_get($whm_url, [
+        'headers' => [
+            'Authorization' => 'whm replanta:' . $token,
+            'Accept' => 'application/json',
+            'User-Agent' => 'WordPress/Replanta-Plugin'
+        ],
+        'timeout' => 30,
+        'sslverify' => false,
+        'blocking' => true
+    ]);
+
+    if (is_wp_error($response)) {
+        $error_msg = $response->get_error_message();
+        error_log('[Dominios Reseller] WP Error: ' . $error_msg);
+        return [
+            'success' => false,
+            'error' => 'Error de conexión: ' . $error_msg
+        ];
+    }
+
+    $status_code = wp_remote_retrieve_response_code($response);
+    $body = wp_remote_retrieve_body($response);
+    
+    error_log('[Dominios Reseller] Test Connection - Status: ' . $status_code . ' Body: ' . substr($body, 0, 200));
+
+    if ($status_code !== 200) {
+        return [
+            'success' => false,
+            'error' => 'Código de respuesta HTTP: ' . $status_code . ' - ' . substr($body, 0, 100)
+        ];
+    }
+
+    $data = json_decode($body, true);
+
+    if (!$data || !isset($data['data']['acct'])) {
+        return [
+            'success' => false,
+            'error' => 'Respuesta inválida del servidor WHM'
+        ];
+    }
+
+    return [
+        'success' => true,
+        'count' => count($data['data']['acct']),
+        'message' => 'Conexión exitosa con WHM'
     ];
 }

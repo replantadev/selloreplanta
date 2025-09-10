@@ -164,7 +164,8 @@ function mostrar_lista_dominios()
 
 function obtener_cuentas_whm($token)
 {
-    $url = 'https://s708.lon1.mysecurecloudhost.com:2087/json-api/listaccts?api.version=1';
+    // Usar IP directa para evitar problemas con Cloudflare
+    $url = 'https://77.95.113.38:2087/json-api/listaccts?api.version=1';
 
     $curl = curl_init();
     curl_setopt_array($curl, [
@@ -211,7 +212,7 @@ function obtener_cuentas_whm($token)
 
 function obtener_addons_de_usuario($cpanel_user, $token)
 {
-    $query = "https://s708.lon1.mysecurecloudhost.com:2087/json-api/cpanel?cpanel_jsonapi_user={$cpanel_user}&cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=AddonDomain&cpanel_jsonapi_func=listaddondomains";
+    $query = "https://77.95.113.38:2087/json-api/cpanel?cpanel_jsonapi_user={$cpanel_user}&cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=AddonDomain&cpanel_jsonapi_func=listaddondomains";
 
     $curl = curl_init();
     curl_setopt_array($curl, [

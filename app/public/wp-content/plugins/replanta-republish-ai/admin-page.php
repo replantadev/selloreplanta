@@ -4,7 +4,27 @@ function replanta_republish_ai_admin_page()
 {
     if (!current_user_can('manage_options')) return;
 
-    echo '<div class="wrap"><h1>Replanta Republish AI</h1>';
+    echo '<div class="wrap"><h1>🧠 Replanta Republish AI</h1>';
+    
+    // Mostrar estado de configuración
+    $options = get_option('replanta_republish_ai_options');
+    $whm_configured = !empty($options['whm_token']);
+    $openai_configured = !empty($options['openai_api_key']);
+    
+    echo '<div style="background: #f9f9f9; padding: 15px; margin: 15px 0; border-left: 4px solid #0073aa;">';
+    echo '<h3>📊 Estado de Configuración</h3>';
+    echo '<p><strong>🔧 WHM Token:</strong> ' . ($whm_configured ? 
+        '<span style="color: green;">✅ Configurado</span>' : 
+        '<span style="color: red;">❌ No configurado</span> - <a href="' . admin_url('admin.php?page=replanta-republish-ai-config') . '">Configurar</a>') . '</p>';
+    echo '<p><strong>🤖 OpenAI API:</strong> ' . ($openai_configured ? 
+        '<span style="color: green;">✅ Configurado</span>' : 
+        '<span style="color: red;">❌ No configurado</span> - <a href="' . admin_url('admin.php?page=replanta-republish-ai-config') . '">Configurar</a>') . '</p>';
+    echo '<p><strong>🌐 Servidor WHM:</strong> 77.95.113.38:2087 (IP directa)</p>';
+    echo '</div>';
+    
+    if (!$whm_configured || !$openai_configured) {
+        echo '<div class="notice notice-warning"><p><strong>⚠️ Atención:</strong> Para el funcionamiento completo del plugin, configura todos los tokens necesarios en la <a href="' . admin_url('admin.php?page=replanta-republish-ai-config') . '">página de configuración</a>.</p></div>';
+    }
 
     // Función auxiliar para Dev.to
     function sanitize_devto_tags($tags) {
@@ -17,11 +37,28 @@ function replanta_republish_ai_admin_page()
         $post_id = intval($_POST['replanta_post_id']);
         $post = get_post($post_id);
 
-        // Detectar destino
+        // Detectar destino y construir URLs
         $is_devto = isset($_POST['submit_devto']);
+        
+        // URLs posibles - necesitamos verificar cuál funciona
+        $possible_urls = [
+            'medium' => [
+                'https://replanta.net/medium-rr/replanta-medium',
+                'https://77.95.113.38/medium-rr/replanta-medium',
+                'https://replanta.dev/medium-rr/replanta-medium'
+            ],
+            'devto' => [
+                'https://replanta.net/medium-rr/replanta-devto',
+                'https://77.95.113.38/medium-rr/replanta-devto', 
+                'https://replanta.dev/medium-rr/replanta-devto'
+            ]
+        ];
+        
         $endpoint = $is_devto 
-            ? 'https://replanta.dev/medium-rr/replanta-devto' 
-            : 'https://replanta.dev/medium-rr/replanta-medium';
+            ? $possible_urls['devto'][0] // Probar primera URL
+            : $possible_urls['medium'][0]; // Probar primera URL
+            
+        error_log('[Republish AI] Intentando conectar a: ' . $endpoint);
 
         $tags_raw = wp_get_post_tags($post_id, ['fields' => 'names']);
         $tags = $is_devto ? sanitize_devto_tags($tags_raw) : $tags_raw;
