@@ -121,20 +121,20 @@ add_action('admin_menu', function () {
 
     add_submenu_page(
         'replanta-republish-ai',
-        'Deploy Status',
-        'Deploy Status',
-        'edit_posts',
-        'replanta-deploy-status',
-        'replanta_deploy_status_page'
-    );
-
-    add_submenu_page(
-        'replanta-republish-ai',
         'Debug Logs',
         'Debug Logs',
         'edit_posts',
         'replanta-republish-ai-debug',
         'replanta_republish_ai_debug_page'
+    );
+
+    add_submenu_page(
+        'replanta-republish-ai',
+        'Deploy Status',
+        'Deploy Status',
+        'edit_posts',
+        'replanta-republish-ai-deploy-status',
+        'replanta_deploy_status_page'
     );
 });
 
@@ -178,7 +178,8 @@ function replanta_republish_ai_dashboard_page() {
     echo '<h3>🚀 Acciones Rápidas</h3>';
     echo '<p><a href="' . admin_url('admin.php?page=replanta-republish-ai-diagnosis') . '" class="button button-primary">🔍 Probar Conexión</a> ';
     echo '<a href="' . admin_url('admin.php?page=replanta-republish-ai-recovery') . '" class="button">🔄 Recuperar Posts</a> ';
-    echo '<a href="' . admin_url('admin.php?page=replanta-republish-ai-debug') . '" class="button">📋 Ver Logs</a></p>';
+    echo '<a href="' . admin_url('admin.php?page=replanta-republish-ai-debug') . '" class="button">📋 Ver Logs</a> ';
+    echo '<a href="' . admin_url('admin.php?page=replanta-republish-ai-deploy-status') . '" class="button">🚀 Deploy Status</a></p>';
     
     echo '</div>';
 }
@@ -260,7 +261,7 @@ add_action('admin_init', function () {
     add_settings_field('microservice_urls', 'URLs del Microservicio', function () {
         $opts = get_option('replanta_republish_ai_options', []);
         $urls = isset($opts['microservice_urls']) ? esc_textarea($opts['microservice_urls']) : 
-            "https://replanta.net/medium-rr/replanta-medium\nhttps://replanta.dev/medium-rr/replanta-medium";
+            "https://replanta.dev/medium-rr/\nhttps://replanta.net/medium-rr/";
         echo "<textarea name='replanta_republish_ai_options[microservice_urls]' rows='4' class='large-text'>$urls</textarea>";
         echo "<p class='description'>URLs del microservicio (una por línea, en orden de prioridad)</p>";
     }, 'replanta-republish-ai-config', 'replanta_republish_ai_api');

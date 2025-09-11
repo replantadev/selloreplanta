@@ -8,7 +8,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-function replanta_recovery_page() {
+function replanta_republish_ai_recovery_page() {
     // Manejar acciones
     if (isset($_GET['action']) && isset($_GET['post_id']) && wp_verify_nonce($_GET['_wpnonce'], 'recovery_action')) {
         $post_id = intval($_GET['post_id']);

@@ -40,17 +40,17 @@ function replanta_republish_ai_admin_page()
         // Detectar destino y construir URLs
         $is_devto = isset($_POST['submit_devto']);
         
-        // URLs posibles - necesitamos verificar cuál funciona
+        // URLs posibles - Microservicio Python Flask
         $possible_urls = [
             'medium' => [
-                'https://replanta.net/medium-rr/replanta-medium',
-                'https://77.95.113.38/medium-rr/replanta-medium',
-                'https://replanta.dev/medium-rr/replanta-medium'
+                'https://replanta.dev/medium-rr/',
+                'https://replanta.net/medium-rr/',
+                'https://77.95.113.38/medium-rr/'
             ],
             'devto' => [
-                'https://replanta.net/medium-rr/replanta-devto',
-                'https://77.95.113.38/medium-rr/replanta-devto', 
-                'https://replanta.dev/medium-rr/replanta-devto'
+                'https://replanta.dev/medium-rr/devto',
+                'https://replanta.net/medium-rr/devto',
+                'https://77.95.113.38/medium-rr/devto'
             ]
         ];
         
