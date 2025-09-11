@@ -1,34 +1,26 @@
-# Ignores for WordPress Development Environment
+# Ignorar todos los archivos y carpetas por defecto
+*
 
-# WordPress Core Files
-app/public/wp-admin/
-app/public/wp-includes/
-app/public/wp-*.php
-app/public/*.php
-app/public/*.html
-app/public/*.txt
+# Incluir solo nuestros plugins personalizados
+!replanta-republish-ai/
+!replanta-republish-ai/**
+!selloreplanta-main/
+!selloreplanta-main/**
+!truspilot-replanta/
+!truspilot-replanta/**
+!dominios-reseller/
+!dominios-reseller/**
+!indice/
+!indice/**
 
-# Configuration Files
-conf/
-logs/
+# Incluir archivos de configuración importantes
+!.gitignore
+!README.md
 
-# Local Environment
-*.local
-.env
-
-# Git repositories (we manage them separately)
-dniwoo/.git/
-plugins/.git/
-
-# WordPress uploads and cache
-app/public/wp-content/uploads/
-app/public/wp-content/cache/
-app/public/wp-content/backup*/
-
-# Database files
-*.sql
-*.db
-
-# Temporary files
-*.tmp
-*.log
+# Excluir archivos temporales y de compilación
+**/.DS_Store
+**/node_modules/
+**/vendor/
+**/*.log
+**/.env
+**/.vscode/

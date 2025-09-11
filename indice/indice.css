@@ -1,0 +1,20 @@
+#indice-de-contenidos {
+  margin-bottom: 20px;
+}
+#indice-de-contenidos ul {
+  list-style: none;
+  padding-left: 0;
+}
+#indice-de-contenidos li {
+  margin-bottom: 5px;
+}
+#indice-de-contenidos a {
+  text-decoration: none;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+#indice-de-contenidos.lista-indice{
+    padding: 20px;
+    background: #d3d3d391;
+}
+.elemento-indice{margin-bottom:0px!important;}
