@@ -19,7 +19,10 @@ git add .
 set /p commit_msg="Mensaje del commit (Enter para auto): "
 if "%commit_msg%"=="" set commit_msg=PUSH DIRECTO: %date% %time%
 git commit -m "%commit_msg%"
-git push https://%GITHUB_TOKEN%@github.com/replantadev/plugins.git main
+
+REM Verificar rama actual y hacer push a la rama correcta
+for /f "tokens=2" %%i in ('git branch --show-current') do set current_branch=%%i
+git push https://%GITHUB_TOKEN%@github.com/replantadev/plugins.git master:main
 if %errorlevel% neq 0 (
     echo ❌ ERROR en GitHub push
     pause
