@@ -4,7 +4,7 @@
 
 header('Content-Type: text/plain');
 
-$repo_dir = '/home/replanta/repos/plugins';
+$repo_dir = '/home/replanta/plugins';
 $wp_plugins = '/home/replanta/replanta.net/wp-content/plugins';
 $log_file = '/home/replanta/deploy.log';
 
@@ -29,7 +29,7 @@ if ($pull_code !== 0) {
 log_msg("✅ Repositorio actualizado");
 
 // 2. Sincronizar plugins
-$plugins = ['replanta-republish-ai', 'dniwoo'];
+$plugins = ['replanta-republish-ai', 'dniwoo', 'dominios-reseller', 'selloreplanta-main', 'truspilot-replanta', 'indice'];
 
 foreach ($plugins as $plugin) {
     if (is_dir("$repo_dir/$plugin")) {
