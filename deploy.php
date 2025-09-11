@@ -4,7 +4,7 @@
 
 header('Content-Type: text/plain');
 
-$repo_dir = '/home/replanta/plugins';
+$repo_dir = '/home/replanta/repos/plugins';
 $wp_plugins = '/home/replanta/replanta.net/wp-content/plugins';
 $log_file = '/home/replanta/deploy.log';
 
@@ -33,9 +33,27 @@ $plugins = ['replanta-republish-ai', 'dniwoo', 'dominios-reseller', 'selloreplan
 
 foreach ($plugins as $plugin) {
     if (is_dir("$repo_dir/$plugin")) {
-        log_msg("🔄 Sincronizando $plugin...");
-        exec("rsync -av --delete '$repo_dir/$plugin/' '$wp_plugins/$plugin/' 2>&1", $sync_out);
-        log_msg("✅ $plugin sincronizado");
+        log_msg("🔄 Sincronizando $plugin SEGURO...");
+        
+        // VERIFICACIÓN DE SEGURIDAD: Solo actualizar archivos específicos
+        $target_dir = "$wp_plugins/$plugin";
+        
+        // Crear directorio si no existe
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir, 0755, true);
+            log_msg("📁 Directorio $plugin creado");
+        }
+        
+        // Sincronizar SIN --delete para proteger archivos extra
+        exec("rsync -av '$repo_dir/$plugin/' '$target_dir/' 2>&1", $sync_out);
+        log_msg("✅ $plugin sincronizado SEGURO (sin borrar archivos extras)");
+        
+        // Log de lo que se sincronizó
+        foreach ($sync_out as $line) {
+            if (strpos($line, '.php') !== false || strpos($line, '.js') !== false || strpos($line, '.css') !== false) {
+                log_msg("   → $line");
+            }
+        }
     }
 }
 
