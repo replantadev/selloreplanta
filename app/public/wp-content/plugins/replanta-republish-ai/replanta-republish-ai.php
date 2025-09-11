@@ -3,15 +3,15 @@
 /**
  * Plugin Name: Replanta Republish AI
  * Description: Genera versiones para Medium (y otros) usando OpenAI al publicar un post. Incluye diagnóstico avanzado y recuperación de errores.
- * Version: 1.4.1
+ * Version: 1.4.2
  * Author: Replanta
- * Changelog: v1.4.1 - Correcciones en class-handler.php, URLs mejoradas, timestamps corregidos
+ * Changelog: v1.4.2 - Sistema de deployment mejorado con GitHub token, webhook optimizado
  */
 
 if (!defined('ABSPATH')) exit;
 
 // Definir constantes del plugin
-define('RREPLANTA_AI_VERSION', '1.4.1');
+define('RREPLANTA_AI_VERSION', '1.4.2');
 define('RREPLANTA_AI_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('RREPLANTA_AI_PLUGIN_URL', plugin_dir_url(__FILE__));
 

@@ -1,17 +1,32 @@
 <?php
 /**
- * Webhook mejorado para deployment directo a cPanel
+ * Webhook mejorado para deployment directo a cPanel con GitHub token
  * Ejecuta git pull forzado cuando recibe la señal
  */
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// GitHub token para autenticación
+define('GITHUB_TOKEN', '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');
+
 // Log function
 function webhook_log($message) {
     $logfile = __DIR__ . '/webhook-deploy.log';
     $timestamp = date('Y-m-d H:i:s');
     file_put_contents($logfile, "[$timestamp] $message\n", FILE_APPEND | LOCK_EX);
+}
+
+// Verificar si es consulta de status
+if (isset($_GET['status']) && $_GET['status'] === 'check') {
+    $last_deployment = __DIR__ . '/last_deployment.json';
+    header('Content-Type: application/json');
+    if (file_exists($last_deployment)) {
+        echo file_get_contents($last_deployment);
+    } else {
+        echo json_encode(['status' => 'no_deployments', 'message' => 'No deployments found']);
+    }
+    exit;
 }
 
 // Verificar método
