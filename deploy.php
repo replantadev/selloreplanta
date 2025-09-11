@@ -16,7 +16,22 @@ function log_msg($msg) {
 
 log_msg("🚀 Iniciando deployment...");
 
-// 1. Actualizar repositorio
+// 1. Configurar repositorio si no existe
+if (!is_dir("$repo_dir/.git")) {
+    log_msg("📁 Repositorio no existe, clonando...");
+    $parent_dir = dirname($repo_dir);
+    if (!is_dir($parent_dir)) {
+        mkdir($parent_dir, 0755, true);
+    }
+    exec("cd '$parent_dir' && git clone https://github.com/replantadev/plugins.git plugins 2>&1", $clone_out, $clone_code);
+    if ($clone_code !== 0) {
+        log_msg("❌ Error clonando: " . implode(' ', $clone_out));
+        exit(1);
+    }
+    log_msg("✅ Repositorio clonado correctamente");
+}
+
+// 2. Actualizar repositorio
 log_msg("📥 Actualizando repositorio...");
 chdir($repo_dir);
 exec('git reset --hard HEAD 2>&1', $reset_out);
