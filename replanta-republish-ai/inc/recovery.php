@@ -9,9 +9,33 @@ if (!defined('ABSPATH')) {
 }
 
 function replanta_republish_ai_recovery_page() {
-    // Ensure the main class is loaded
+    // Enhanced class loading with diagnostic logging
     if (!class_exists('Replanta_Republish_AI')) {
-        require_once dirname(__FILE__) . '/class-handler.php';
+        $possible_paths = [
+            dirname(__FILE__) . '/class-handler.php',
+            dirname(dirname(__FILE__)) . '/inc/class-handler.php',
+            plugin_dir_path(dirname(__FILE__)) . 'inc/class-handler.php'
+        ];
+        
+        $loaded = false;
+        foreach ($possible_paths as $path) {
+            if (file_exists($path)) {
+                require_once $path;
+                if (class_exists('Replanta_Republish_AI')) {
+                    rr_ai_log("Clase cargada exitosamente desde: $path", 'info');
+                    $loaded = true;
+                    break;
+                } else {
+                    rr_ai_log("Archivo existe pero clase no se cargó desde: $path", 'warning');
+                }
+            } else {
+                rr_ai_log("Archivo no encontrado en: $path", 'warning');
+            }
+        }
+        
+        if (!$loaded) {
+            rr_ai_log("ERROR CRÍTICO: No se pudo cargar la clase Replanta_Republish_AI desde ninguna ruta", 'error');
+        }
     }
     
     // Get platform filter
@@ -24,8 +48,11 @@ function replanta_republish_ai_recovery_page() {
     if (empty($supported_platforms)) {
         $supported_platforms = [
             'medium' => ['name' => 'Medium', 'icon' => '📰', 'enabled' => true],
-            'devto' => ['name' => 'Dev.to', 'icon' => '💻', 'enabled' => true]
+            'devto' => ['name' => 'Dev.to', 'icon' => '💻', 'enabled' => true],
+            'hashnode' => ['name' => 'Hashnode', 'icon' => '📝', 'enabled' => false],
+            'linkedin' => ['name' => 'LinkedIn', 'icon' => '💼', 'enabled' => false]
         ];
+        rr_ai_log("Usando plataformas fallback debido a clase no disponible", 'warning');
     }
     
     // Manejar acciones
@@ -285,9 +312,34 @@ function replanta_republish_ai_recovery_page() {
 }
 
 function retry_post_publication($post_id, $platforms = null) {
-    // Ensure the main class is loaded
+    // Enhanced class loading with diagnostic logging
     if (!class_exists('Replanta_Republish_AI')) {
-        require_once dirname(__FILE__) . '/class-handler.php';
+        $possible_paths = [
+            dirname(__FILE__) . '/class-handler.php',
+            dirname(dirname(__FILE__)) . '/inc/class-handler.php',
+            __DIR__ . '/class-handler.php',
+            realpath(dirname(__FILE__) . '/../inc/class-handler.php'),
+        ];
+        
+        $loaded = false;
+        foreach ($possible_paths as $path) {
+            if ($path && file_exists($path)) {
+                require_once $path;
+                if (class_exists('Replanta_Republish_AI')) {
+                    rr_ai_log("Clase cargada exitosamente para retry desde: $path", 'info');
+                    $loaded = true;
+                    break;
+                } else {
+                    rr_ai_log("Archivo retry existe pero clase no se cargó desde: $path", 'warning');
+                }
+            } else {
+                rr_ai_log("Archivo retry no encontrado en: $path", 'warning');
+            }
+        }
+        
+        if (!$loaded) {
+            rr_ai_log("ERROR CRÍTICO EN RETRY: No se pudo cargar la clase Replanta_Republish_AI", 'error');
+        }
     }
     
     rr_ai_log("Reintento manual iniciado para post ID: $post_id", 'info');
