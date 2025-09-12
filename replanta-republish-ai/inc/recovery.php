@@ -9,9 +9,24 @@ if (!defined('ABSPATH')) {
 }
 
 function replanta_republish_ai_recovery_page() {
+    // Ensure the main class is loaded
+    if (!class_exists('Replanta_Republish_AI')) {
+        require_once dirname(__FILE__) . '/class-handler.php';
+    }
+    
     // Get platform filter
     $platform_filter = isset($_GET['platform']) ? sanitize_text_field($_GET['platform']) : 'all';
-    $supported_platforms = Replanta_Republish_AI::get_supported_platforms();
+    $supported_platforms = class_exists('Replanta_Republish_AI') ? 
+        Replanta_Republish_AI::get_supported_platforms() : 
+        [];
+    
+    // Fallback platforms if class not available
+    if (empty($supported_platforms)) {
+        $supported_platforms = [
+            'medium' => ['name' => 'Medium', 'icon' => '📰', 'enabled' => true],
+            'devto' => ['name' => 'Dev.to', 'icon' => '💻', 'enabled' => true]
+        ];
+    }
     
     // Manejar acciones
     if (isset($_GET['action']) && isset($_GET['post_id']) && wp_verify_nonce($_GET['_wpnonce'], 'recovery_action')) {
@@ -270,6 +285,11 @@ function replanta_republish_ai_recovery_page() {
 }
 
 function retry_post_publication($post_id, $platforms = null) {
+    // Ensure the main class is loaded
+    if (!class_exists('Replanta_Republish_AI')) {
+        require_once dirname(__FILE__) . '/class-handler.php';
+    }
+    
     rr_ai_log("Reintento manual iniciado para post ID: $post_id", 'info');
     
     // If specific platforms are specified, only clear those
@@ -285,12 +305,22 @@ function retry_post_publication($post_id, $platforms = null) {
         delete_post_meta($post_id, '_rr_sent_to_ai');
         delete_post_meta($post_id, '_rr_ai_error');
         
-        // Clear platform-specific metadata
-        $supported_platforms = Replanta_Republish_AI::get_supported_platforms();
-        foreach ($supported_platforms as $key => $platform) {
-            delete_post_meta($post_id, "_rr_sent_to_{$key}");
-            delete_post_meta($post_id, "_rr_{$key}_url");
-            delete_post_meta($post_id, "_rr_{$key}_title");
+        // Clear platform-specific metadata if class is available
+        if (class_exists('Replanta_Republish_AI')) {
+            $supported_platforms = Replanta_Republish_AI::get_supported_platforms();
+            foreach ($supported_platforms as $key => $platform) {
+                delete_post_meta($post_id, "_rr_sent_to_{$key}");
+                delete_post_meta($post_id, "_rr_{$key}_url");
+                delete_post_meta($post_id, "_rr_{$key}_title");
+            }
+        } else {
+            // Fallback: clear known platforms
+            $fallback_platforms = ['medium', 'devto', 'hashnode', 'linkedin'];
+            foreach ($fallback_platforms as $key) {
+                delete_post_meta($post_id, "_rr_sent_to_{$key}");
+                delete_post_meta($post_id, "_rr_{$key}_url");
+                delete_post_meta($post_id, "_rr_{$key}_title");
+            }
         }
     }
     
@@ -302,7 +332,7 @@ function retry_post_publication($post_id, $platforms = null) {
     }
     
     // Send to specific platforms or use the main handler
-    if ($platforms && is_array($platforms)) {
+    if ($platforms && is_array($platforms) && class_exists('Replanta_Republish_AI')) {
         $results = [];
         foreach ($platforms as $platform_key) {
             $result = Replanta_Republish_AI::send_to_platform($post_id, $platform_key);
@@ -311,7 +341,12 @@ function retry_post_publication($post_id, $platforms = null) {
         return $results;
     } else {
         // Llamar al handler principal para todas las plataformas habilitadas
-        Replanta_Republish_AI::handle_new_post($post_id, $post);
+        if (class_exists('Replanta_Republish_AI')) {
+            Replanta_Republish_AI::handle_new_post($post_id, $post);
+        } else {
+            rr_ai_log("Clase Replanta_Republish_AI no disponible para reintento de post $post_id", 'error');
+            return false;
+        }
         return true;
     }
 }
