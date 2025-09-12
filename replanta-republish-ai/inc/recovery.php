@@ -9,17 +9,31 @@ if (!defined('ABSPATH')) {
 }
 
 function replanta_republish_ai_recovery_page() {
+    // Get platform filter
+    $platform_filter = isset($_GET['platform']) ? sanitize_text_field($_GET['platform']) : 'all';
+    $supported_platforms = Replanta_Republish_AI::get_supported_platforms();
+    
     // Manejar acciones
     if (isset($_GET['action']) && isset($_GET['post_id']) && wp_verify_nonce($_GET['_wpnonce'], 'recovery_action')) {
         $post_id = intval($_GET['post_id']);
+        $specific_platform = isset($_GET['platform']) ? sanitize_text_field($_GET['platform']) : null;
         
         if ($_GET['action'] == 'retry') {
-            retry_post_publication($post_id);
-            echo '<div class="notice notice-success"><p>✅ Post reenviado para procesamiento.</p></div>';
+            if ($specific_platform && $specific_platform !== 'all') {
+                retry_post_publication($post_id, [$specific_platform]);
+                echo '<div class="notice notice-success"><p>✅ Post reenviado para procesamiento en ' . $supported_platforms[$specific_platform]['name'] . '.</p></div>';
+            } else {
+                retry_post_publication($post_id);
+                echo '<div class="notice notice-success"><p>✅ Post reenviado para procesamiento en todas las plataformas.</p></div>';
+            }
         } elseif ($_GET['action'] == 'mark_sent') {
-            update_post_meta($post_id, '_rr_sent_to_ai', current_time('mysql'));
-            delete_post_meta($post_id, '_rr_ai_error');
-            echo '<div class="notice notice-success"><p>✅ Post marcado como enviado.</p></div>';
+            if ($specific_platform && $specific_platform !== 'all') {
+                update_post_meta($post_id, "_rr_sent_to_{$specific_platform}", current_time('mysql'));
+                echo '<div class="notice notice-success"><p>✅ Post marcado como enviado en ' . $supported_platforms[$specific_platform]['name'] . '.</p></div>';
+            } else {
+                update_post_meta($post_id, '_rr_sent_to_ai', current_time('mysql'));
+                echo '<div class="notice notice-success"><p>✅ Post marcado como enviado.</p></div>';
+            }
         } elseif ($_GET['action'] == 'clear_error') {
             delete_post_meta($post_id, '_rr_ai_error');
             echo '<div class="notice notice-success"><p>✅ Error limpiado.</p></div>';
@@ -41,7 +55,27 @@ function replanta_republish_ai_recovery_page() {
     
     ?>
     <div class="wrap">
-        <h1>🔄 Recuperación de Posts</h1>
+        <h1>🔄 Recuperación de Posts - Multi-plataforma</h1>
+        
+        <!-- Platform Filter -->
+        <div class="platform-filter" style="margin: 20px 0; padding: 15px; background: #f0f0f1; border-radius: 5px;">
+            <h3>🎯 Filtrar por Plataforma</h3>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="<?php echo admin_url('admin.php?page=replanta-republish-ai-recovery&platform=all'); ?>" 
+                   class="button <?php echo $platform_filter === 'all' ? 'button-primary' : ''; ?>">
+                    🌐 Todas las Plataformas
+                </a>
+                <?php foreach ($supported_platforms as $key => $platform): ?>
+                    <a href="<?php echo admin_url('admin.php?page=replanta-republish-ai-recovery&platform=' . $key); ?>" 
+                       class="button <?php echo $platform_filter === $key ? 'button-primary' : ''; ?>">
+                        <?php echo $platform['icon']; ?> <?php echo $platform['name']; ?>
+                        <?php if (!$platform['enabled']): ?>
+                            <span style="font-size: 10px; opacity: 0.7;">(Pendiente)</span>
+                        <?php endif; ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
         
         <!-- Tabs -->
         <h2 class="nav-tab-wrapper">
@@ -235,12 +269,30 @@ function replanta_republish_ai_recovery_page() {
     <?php
 }
 
-function retry_post_publication($post_id) {
+function retry_post_publication($post_id, $platforms = null) {
     rr_ai_log("Reintento manual iniciado para post ID: $post_id", 'info');
     
-    // Limpiar meta anterior
-    delete_post_meta($post_id, '_rr_sent_to_ai');
-    delete_post_meta($post_id, '_rr_ai_error');
+    // If specific platforms are specified, only clear those
+    if ($platforms && is_array($platforms)) {
+        foreach ($platforms as $platform) {
+            delete_post_meta($post_id, "_rr_sent_to_{$platform}");
+            delete_post_meta($post_id, "_rr_{$platform}_url");
+            delete_post_meta($post_id, "_rr_{$platform}_title");
+        }
+        rr_ai_log("Limpiando metadata para plataformas: " . implode(', ', $platforms), 'info');
+    } else {
+        // Limpiar meta anterior para todas las plataformas
+        delete_post_meta($post_id, '_rr_sent_to_ai');
+        delete_post_meta($post_id, '_rr_ai_error');
+        
+        // Clear platform-specific metadata
+        $supported_platforms = Replanta_Republish_AI::get_supported_platforms();
+        foreach ($supported_platforms as $key => $platform) {
+            delete_post_meta($post_id, "_rr_sent_to_{$key}");
+            delete_post_meta($post_id, "_rr_{$key}_url");
+            delete_post_meta($post_id, "_rr_{$key}_title");
+        }
+    }
     
     // Obtener el post
     $post = get_post($post_id);
@@ -249,10 +301,19 @@ function retry_post_publication($post_id) {
         return false;
     }
     
-    // Llamar al handler principal
-    Replanta_Republish_AI::handle_new_post($post_id, $post);
-    
-    return true;
+    // Send to specific platforms or use the main handler
+    if ($platforms && is_array($platforms)) {
+        $results = [];
+        foreach ($platforms as $platform_key) {
+            $result = Replanta_Republish_AI::send_to_platform($post_id, $platform_key);
+            $results[$platform_key] = $result;
+        }
+        return $results;
+    } else {
+        // Llamar al handler principal para todas las plataformas habilitadas
+        Replanta_Republish_AI::handle_new_post($post_id, $post);
+        return true;
+    }
 }
 
 function get_posts_with_errors($limit = 50) {

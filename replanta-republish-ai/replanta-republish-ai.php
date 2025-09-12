@@ -258,6 +258,27 @@ add_action('admin_init', function () {
         echo "<p class='description'>Token para publicar en Medium (opcional)</p>";
     }, 'replanta-republish-ai-config', 'replanta_republish_ai_api');
 
+    add_settings_field('devto_api_key', 'Dev.to API Key', function () {
+        $opts = get_option('replanta_republish_ai_options', []);
+        $key = isset($opts['devto_api_key']) ? esc_attr($opts['devto_api_key']) : '';
+        echo "<input type='password' name='replanta_republish_ai_options[devto_api_key]' value='$key' class='regular-text' autocomplete='off'>";
+        echo "<p class='description'>API Key de Dev.to para publicar artículos</p>";
+    }, 'replanta-republish-ai-config', 'replanta_republish_ai_api');
+
+    add_settings_field('hashnode_token', 'Hashnode Personal Access Token', function () {
+        $opts = get_option('replanta_republish_ai_options', []);
+        $token = isset($opts['hashnode_token']) ? esc_attr($opts['hashnode_token']) : '';
+        echo "<input type='password' name='replanta_republish_ai_options[hashnode_token]' value='$token' class='regular-text' autocomplete='off'>";
+        echo "<p class='description'>Token de acceso personal de Hashnode (en desarrollo)</p>";
+    }, 'replanta-republish-ai-config', 'replanta_republish_ai_api');
+
+    add_settings_field('linkedin_token', 'LinkedIn Access Token', function () {
+        $opts = get_option('replanta_republish_ai_options', []);
+        $token = isset($opts['linkedin_token']) ? esc_attr($opts['linkedin_token']) : '';
+        echo "<input type='password' name='replanta_republish_ai_options[linkedin_token]' value='$token' class='regular-text' autocomplete='off'>";
+        echo "<p class='description'>Token de acceso de LinkedIn para publicar artículos (en desarrollo)</p>";
+    }, 'replanta-republish-ai-config', 'replanta_republish_ai_api');
+
     add_settings_field('microservice_urls', 'URLs del Microservicio', function () {
         $opts = get_option('replanta_republish_ai_options', []);
         $urls = isset($opts['microservice_urls']) ? esc_textarea($opts['microservice_urls']) : 
@@ -285,6 +306,18 @@ function replanta_republish_ai_validate_options($input) {
         $clean['medium_integration_token'] = sanitize_text_field($input['medium_integration_token']);
     }
     
+    if (isset($input['devto_api_key'])) {
+        $clean['devto_api_key'] = sanitize_text_field($input['devto_api_key']);
+    }
+    
+    if (isset($input['hashnode_token'])) {
+        $clean['hashnode_token'] = sanitize_text_field($input['hashnode_token']);
+    }
+    
+    if (isset($input['linkedin_token'])) {
+        $clean['linkedin_token'] = sanitize_text_field($input['linkedin_token']);
+    }
+    
     if (isset($input['microservice_urls'])) {
         $clean['microservice_urls'] = sanitize_textarea_field($input['microservice_urls']);
     }
@@ -295,7 +328,7 @@ function replanta_republish_ai_validate_options($input) {
         $clean['auto_publish'] = '0';
     }
     
-    rr_ai_log('Configuración actualizada', 'info');
+    rr_ai_log('Configuración actualizada para múltiples plataformas', 'info');
     
     return $clean;
 }
