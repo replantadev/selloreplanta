@@ -136,6 +136,15 @@ add_action('admin_menu', function () {
         'replanta-republish-ai-deploy-status',
         'replanta_deploy_status_page'
     );
+
+    add_submenu_page(
+        'replanta-republish-ai',
+        'Test Clases',
+        'Test Clases',
+        'manage_options',
+        'replanta-republish-ai-class-test',
+        'replanta_class_loader_test_page'
+    );
 });
 
 // Función Dashboard principal
@@ -378,4 +387,107 @@ function replanta_republish_ai_meta_box($post) {
     }
     
     echo '</div>';
+}
+
+// Función para página de prueba de carga de clases
+function replanta_class_loader_test_page() {
+    if (!current_user_can('manage_options')) return;
+    
+    ?>
+    <div class="wrap">
+        <h1>🔧 Test de Carga de Clases</h1>
+        
+        <div class="card">
+            <h2>🔍 Diagnóstico de Carga de Clases</h2>
+            
+            <?php
+            // Información del entorno
+            echo "<p><strong>Directorio actual:</strong> " . __DIR__ . "</p>";
+            echo "<p><strong>Archivo actual:</strong> " . __FILE__ . "</p>";
+            
+            // Rutas posibles para class-handler.php
+            $possible_paths = [
+                __DIR__ . '/inc/class-handler.php',
+                dirname(__FILE__) . '/inc/class-handler.php',
+                plugin_dir_path(__FILE__) . 'inc/class-handler.php',
+                realpath(dirname(__FILE__) . '/inc/class-handler.php'),
+            ];
+            
+            echo "<h3>📁 Verificación de Rutas:</h3>";
+            echo "<ul>";
+            foreach ($possible_paths as $i => $path) {
+                $exists = $path && file_exists($path);
+                $readable = $exists && is_readable($path);
+                echo "<li>";
+                echo "<strong>Ruta " . ($i + 1) . ":</strong> <code>" . esc_html($path) . "</code><br>";
+                echo "Existe: " . ($exists ? "✅" : "❌") . " | ";
+                echo "Legible: " . ($readable ? "✅" : "❌");
+                if ($exists) {
+                    echo " | Tamaño: " . filesize($path) . " bytes";
+                }
+                echo "</li>";
+            }
+            echo "</ul>";
+            
+            // Test de carga de clase
+            echo "<h3>🔧 Test de Carga de Clase:</h3>";
+            echo "<p><strong>Clase existe antes:</strong> " . (class_exists('Replanta_Republish_AI') ? "✅ SÍ" : "❌ NO") . "</p>";
+            
+            // Intentar cargar la clase
+            $loaded = false;
+            foreach ($possible_paths as $path) {
+                if ($path && file_exists($path) && is_readable($path)) {
+                    echo "<p>Intentando cargar desde: <code>" . esc_html($path) . "</code>";
+                    try {
+                        require_once $path;
+                        if (class_exists('Replanta_Republish_AI')) {
+                            echo " → ✅ ÉXITO</p>";
+                            $loaded = true;
+                            break;
+                        } else {
+                            echo " → ❌ Archivo cargado pero clase no disponible</p>";
+                        }
+                    } catch (Exception $e) {
+                        echo " → ❌ Error: " . esc_html($e->getMessage()) . "</p>";
+                    }
+                }
+            }
+            
+            echo "<p><strong>Clase existe después:</strong> " . (class_exists('Replanta_Republish_AI') ? "✅ SÍ" : "❌ NO") . "</p>";
+            
+            // Si la clase existe, verificar métodos
+            if (class_exists('Replanta_Republish_AI')) {
+                echo "<h3>🔍 Verificación de Métodos:</h3>";
+                $methods_to_check = ['send_to_platform', 'get_supported_platforms', 'send_to_ai_service'];
+                echo "<ul>";
+                foreach ($methods_to_check as $method) {
+                    $exists = method_exists('Replanta_Republish_AI', $method);
+                    echo "<li><strong>$method:</strong> " . ($exists ? "✅ Disponible" : "❌ No encontrado") . "</li>";
+                }
+                echo "</ul>";
+                
+                // Mostrar constantes de la clase
+                if (method_exists('Replanta_Republish_AI', 'get_supported_platforms')) {
+                    try {
+                        $platforms = Replanta_Republish_AI::get_supported_platforms();
+                        echo "<h3>🌐 Plataformas Soportadas:</h3>";
+                        echo "<pre>" . print_r($platforms, true) . "</pre>";
+                    } catch (Exception $e) {
+                        echo "<p>❌ Error al obtener plataformas: " . esc_html($e->getMessage()) . "</p>";
+                    }
+                }
+            }
+            
+            // Información adicional del sistema
+            echo "<h3>💻 Información del Sistema:</h3>";
+            echo "<ul>";
+            echo "<li><strong>PHP Version:</strong> " . PHP_VERSION . "</li>";
+            echo "<li><strong>WordPress Version:</strong> " . get_bloginfo('version') . "</li>";
+            echo "<li><strong>Memory Limit:</strong> " . ini_get('memory_limit') . "</li>";
+            echo "<li><strong>Tiempo ejecución:</strong> " . ini_get('max_execution_time') . "s</li>";
+            echo "</ul>";
+            ?>
+        </div>
+    </div>
+    <?php
 }
