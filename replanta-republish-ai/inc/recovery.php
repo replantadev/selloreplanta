@@ -111,8 +111,8 @@ function replanta_republish_ai_recovery_page() {
                     <a href="<?php echo admin_url('admin.php?page=replanta-republish-ai-recovery&platform=' . $key); ?>" 
                        class="button <?php echo $platform_filter === $key ? 'button-primary' : ''; ?>">
                         <?php echo $platform['icon']; ?> <?php echo $platform['name']; ?>
-                        <?php if (!$platform['enabled']): ?>
-                            <span style="font-size: 10px; opacity: 0.7;">(Pendiente)</span>
+                        <?php if (isset($platform['status']) && $platform['status'] !== 'active'): ?>
+                            <span style="font-size: 10px; opacity: 0.7;">(<?php echo ucfirst($platform['status']); ?>)</span>
                         <?php endif; ?>
                     </a>
                 <?php endforeach; ?>
@@ -253,6 +253,7 @@ function replanta_republish_ai_recovery_page() {
                     <thead>
                         <tr>
                             <th>Post</th>
+                            <th>Plataformas Enviadas</th>
                             <th>Fecha Envío</th>
                             <th>Acciones</th>
                         </tr>
@@ -270,7 +271,18 @@ function replanta_republish_ai_recovery_page() {
                                     <small>ID: <?php echo $post['ID']; ?> | 
                                     <a href="<?php echo get_permalink($post['ID']); ?>" target="_blank">Ver post</a></small>
                                 </td>
-                                <td><?php echo esc_html($post['sent_date']); ?></td>
+                                <td>
+                                    <?php 
+                                    $platforms = explode(', ', $post['platforms'] ?? '');
+                                    $supported = Replanta_Republish_AI::get_supported_platforms();
+                                    foreach ($platforms as $platform): 
+                                        if (isset($supported[trim($platform)])):
+                                            echo $supported[trim($platform)]['icon'] . ' ' . $supported[trim($platform)]['name'] . '<br>';
+                                        endif;
+                                    endforeach; 
+                                    ?>
+                                </td>
+                                <td><?php echo esc_html($post['post_date']); ?></td>
                                 <td>
                                     <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=replanta-republish-ai-recovery&action=retry&post_id=' . $post['ID']), 'recovery_action'); ?>" 
                                        class="button button-small">🔄 Reenviar</a>
@@ -441,14 +453,18 @@ function get_pending_posts($limit = 50) {
 function get_sent_posts($limit = 20) {
     global $wpdb;
     
+    // Buscar posts que han sido enviados a cualquier plataforma
     $results = $wpdb->get_results($wpdb->prepare("
-        SELECT p.ID, p.post_title, pm.meta_value as sent_date
+        SELECT DISTINCT p.ID, p.post_title, p.post_date, 
+               GROUP_CONCAT(DISTINCT REPLACE(pm.meta_key, '_rr_sent_to_', '') SEPARATOR ', ') as platforms
         FROM {$wpdb->posts} p
         INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
-        WHERE pm.meta_key = '_rr_sent_to_ai'
+        WHERE (pm.meta_key = '_rr_sent_to_ai' OR pm.meta_key LIKE '_rr_sent_to_%')
+        AND pm.meta_key != '_rr_sent_to_ai_error'
         AND p.post_status = 'publish'
         AND p.post_type = 'post'
-        ORDER BY pm.meta_value DESC
+        GROUP BY p.ID
+        ORDER BY p.post_date DESC
         LIMIT %d
     ", $limit), 'ARRAY_A');
     

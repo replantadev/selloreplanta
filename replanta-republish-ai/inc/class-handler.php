@@ -73,11 +73,21 @@ class Replanta_Republish_AI {
 
         // Obtener configuración
         $options = get_option('replanta_republish_ai_options', []);
-        $microservice_url = isset($options['microservice_url']) ? rtrim($options['microservice_url'], '/') : '';
+        $microservice_url = '';
         
+        // Priorizar microservice_url individual si existe, si no usar microservice_urls
+        if (isset($options['microservice_url']) && !empty($options['microservice_url'])) {
+            $microservice_url = rtrim($options['microservice_url'], '/');
+        } elseif (isset($options['microservice_urls']) && !empty($options['microservice_urls'])) {
+            // Tomar la primera línea de las URLs configuradas
+            $urls = explode("\n", $options['microservice_urls']);
+            $microservice_url = rtrim(trim($urls[0]), '/');
+        }
+        
+        // URL por defecto si no está configurada
         if (empty($microservice_url)) {
-            rr_ai_log("URL del microservicio no configurada", 'error');
-            return false;
+            $microservice_url = 'https://replanta.dev/medium-rr';
+            rr_ai_log("Usando URL por defecto del microservicio: $microservice_url", 'info');
         }
 
         // Preparar datos del post
@@ -144,7 +154,7 @@ class Replanta_Republish_AI {
                     if (isset($result['results'])) {
                         foreach ($result['results'] as $platform => $platform_result) {
                             if ($platform_result['success']) {
-                                update_post_meta($post_id, "_rr_sent_to_{$platform}", 1);
+                                update_post_meta($post_id, "_rr_sent_to_{$platform}", date('Y-m-d H:i:s'));
                                 if (isset($platform_result['url'])) {
                                     update_post_meta($post_id, "_rr_{$platform}_url", $platform_result['url']);
                                 }
@@ -159,7 +169,7 @@ class Replanta_Republish_AI {
                         }
                     }
                     
-                    update_post_meta($post_id, '_rr_sent_to_ai', 1);
+                    update_post_meta($post_id, '_rr_sent_to_ai', date('Y-m-d H:i:s'));
                     return true;
                 } else {
                     $error_msg = isset($result['error']) ? $result['error'] : 'Error desconocido en respuesta';
@@ -196,11 +206,21 @@ class Replanta_Republish_AI {
 
         // Obtener configuración
         $options = get_option('replanta_republish_ai_options', []);
-        $microservice_url = isset($options['microservice_url']) ? rtrim($options['microservice_url'], '/') : '';
+        $microservice_url = '';
         
+        // Priorizar microservice_url individual si existe, si no usar microservice_urls
+        if (isset($options['microservice_url']) && !empty($options['microservice_url'])) {
+            $microservice_url = rtrim($options['microservice_url'], '/');
+        } elseif (isset($options['microservice_urls']) && !empty($options['microservice_urls'])) {
+            // Tomar la primera línea de las URLs configuradas
+            $urls = explode("\n", $options['microservice_urls']);
+            $microservice_url = rtrim(trim($urls[0]), '/');
+        }
+        
+        // URL por defecto si no está configurada
         if (empty($microservice_url)) {
-            rr_ai_log("URL del microservicio no configurada", 'error');
-            return false;
+            $microservice_url = 'https://replanta.dev/medium-rr';
+            rr_ai_log("Usando URL por defecto del microservicio: $microservice_url", 'info');
         }
 
         // Preparar datos específicos de la plataforma
@@ -261,7 +281,7 @@ class Replanta_Republish_AI {
                     rr_ai_log("Envío exitoso a {$platform['name']} desde: $full_url", 'info');
                     
                     // Guardar metadatos
-                    update_post_meta($post_id, "_rr_sent_to_{$platform_key}", 1);
+                    update_post_meta($post_id, "_rr_sent_to_{$platform_key}", date('Y-m-d H:i:s'));
                     if (isset($result['url'])) {
                         update_post_meta($post_id, "_rr_{$platform_key}_url", $result['url']);
                     }
