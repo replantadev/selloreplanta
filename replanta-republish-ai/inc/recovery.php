@@ -394,12 +394,11 @@ function retry_post_publication($post_id, $platforms = null) {
     } else {
         // Llamar al handler principal para todas las plataformas habilitadas
         if (class_exists('Replanta_Republish_AI')) {
-            Replanta_Republish_AI::handle_new_post($post_id, $post);
+            return Replanta_Republish_AI::send_to_ai_service($post_id, $platforms);
         } else {
             rr_ai_log("Clase Replanta_Republish_AI no disponible para reintento de post $post_id", 'error');
             return false;
         }
-        return true;
     }
 }
 
@@ -415,7 +414,7 @@ function get_posts_with_errors($limit = 50) {
         AND p.post_type = 'post'
         ORDER BY p.post_modified DESC
         LIMIT %d
-    ", $limit), ARRAY_A);
+    ", $limit), 'ARRAY_A');
     
     return $results;
 }
@@ -451,7 +450,7 @@ function get_sent_posts($limit = 20) {
         AND p.post_type = 'post'
         ORDER BY pm.meta_value DESC
         LIMIT %d
-    ", $limit), ARRAY_A);
+    ", $limit), 'ARRAY_A');
     
     return $results;
 }
