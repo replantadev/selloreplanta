@@ -47,10 +47,10 @@ function replanta_republish_ai_recovery_page() {
     // Fallback platforms if class not available
     if (empty($supported_platforms)) {
         $supported_platforms = [
-            'medium' => ['name' => 'Medium', 'icon' => '📰', 'enabled' => true],
-            'devto' => ['name' => 'Dev.to', 'icon' => '💻', 'enabled' => true],
-            'hashnode' => ['name' => 'Hashnode', 'icon' => '📝', 'enabled' => false],
-            'linkedin' => ['name' => 'LinkedIn', 'icon' => '💼', 'enabled' => false]
+            'medium' => ['name' => 'Medium', 'icon' => '📰', 'status' => 'active'],
+            'devto' => ['name' => 'Dev.to', 'icon' => '💻', 'status' => 'active'],
+            'hashnode' => ['name' => 'Hashnode', 'icon' => '📝', 'status' => 'planned'],
+            'linkedin' => ['name' => 'LinkedIn', 'icon' => '💼', 'status' => 'planned']
         ];
         rr_ai_log("Usando plataformas fallback debido a clase no disponible", 'warning');
     }
