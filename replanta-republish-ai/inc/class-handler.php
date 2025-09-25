@@ -122,7 +122,7 @@ class Replanta_Republish_AI {
         // Intentar envío a cada URL
         foreach ($urls_to_try as $base_url) {
             $base_url = rtrim($base_url, '/');
-            $full_url = $base_url . '/multi-platform';
+            $full_url = $base_url; // El endpoint base sin /multi-platform
 
             rr_ai_log("Intentando envío multi-plataforma a: $full_url", 'info');
 
