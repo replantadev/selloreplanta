@@ -119,64 +119,86 @@ class Replanta_Republish_AI {
             $urls_to_try = array_merge($urls_to_try, $fallback_urls);
         }
 
-        // Intentar envío a cada URL
+        // Intentar envío a cada URL con endpoints específicos por plataforma
         foreach ($urls_to_try as $base_url) {
             $base_url = rtrim($base_url, '/');
-            $full_url = $base_url; // El endpoint base sin /multi-platform
-
-            rr_ai_log("Intentando envío multi-plataforma a: $full_url", 'info');
-
-            $response = wp_remote_post($full_url, [
-                'body' => json_encode($post_data),
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'User-Agent' => 'Replanta-Republish-AI/1.4.3'
-                ],
-                'timeout' => 60,
-                'sslverify' => false
-            ]);
-
-            if (is_wp_error($response)) {
-                rr_ai_log("Error WP en multi-plataforma ($full_url): " . $response->get_error_message(), 'error');
-                continue;
-            }
-
-            $response_code = wp_remote_retrieve_response_code($response);
-            $response_body = wp_remote_retrieve_body($response);
-
-            if ($response_code === 200) {
-                $result = json_decode($response_body, true);
-                
-                if ($result && isset($result['success']) && $result['success']) {
-                    rr_ai_log("Envío multi-plataforma exitoso desde: $full_url", 'info');
-                    
-                    // Guardar metadatos para cada plataforma
-                    if (isset($result['results'])) {
-                        foreach ($result['results'] as $platform => $platform_result) {
-                            if ($platform_result['success']) {
-                                update_post_meta($post_id, "_rr_sent_to_{$platform}", date('Y-m-d H:i:s'));
-                                if (isset($platform_result['url'])) {
-                                    update_post_meta($post_id, "_rr_{$platform}_url", $platform_result['url']);
-                                }
-                                if (isset($platform_result['title'])) {
-                                    update_post_meta($post_id, "_rr_{$platform}_title", $platform_result['title']);
-                                }
-                                rr_ai_log("Post enviado exitosamente a $platform", 'info');
-                            } else {
-                                $error_msg = isset($platform_result['error']) ? $platform_result['error'] : 'Error desconocido';
-                                rr_ai_log("Error enviando a $platform: $error_msg", 'error');
-                            }
-                        }
-                    }
-                    
-                    update_post_meta($post_id, '_rr_sent_to_ai', date('Y-m-d H:i:s'));
-                    return true;
-                } else {
-                    $error_msg = isset($result['error']) ? $result['error'] : 'Error desconocido en respuesta';
-                    rr_ai_log("Error en respuesta multi-plataforma: $error_msg", 'error');
+            
+            // Enviar a cada plataforma por separado
+            $platform_results = [];
+            $all_success = true;
+            
+            foreach ($platforms as $platform) {
+                // Determinar endpoint específico
+                $endpoint = '';
+                switch($platform) {
+                    case 'medium':
+                        $endpoint = '/replanta-medium';
+                        break;
+                    case 'devto':
+                        $endpoint = '/replanta-devto';
+                        break;
+                    default:
+                        rr_ai_log("Plataforma no soportada: $platform", 'error');
+                        $all_success = false;
+                        continue;
                 }
-            } else {
-                rr_ai_log("Código de respuesta multi-plataforma: $response_code - $response_body", 'error');
+                
+                $full_url = $base_url . $endpoint;
+                rr_ai_log("Intentando envío a $platform en: $full_url", 'info');
+                
+                // Preparar datos específicos para esta plataforma
+                $platform_data = $post_data;
+                $platform_data['platforms'] = [$platform];
+
+                $response = wp_remote_post($full_url, [
+                    'body' => json_encode($platform_data),
+                    'headers' => [
+                        'Content-Type' => 'application/json',
+                        'User-Agent' => 'Replanta-Republish-AI/1.4.3'
+                    ],
+                    'timeout' => 60,
+                    'sslverify' => false
+                ]);
+
+                if (is_wp_error($response)) {
+                    rr_ai_log("Error WP en $platform ($full_url): " . $response->get_error_message(), 'error');
+                    $all_success = false;
+                    continue;
+                }
+
+                $response_code = wp_remote_retrieve_response_code($response);
+                $response_body = wp_remote_retrieve_body($response);
+
+                if ($response_code === 200) {
+                    $result = json_decode($response_body, true);
+                    
+                    if ($result && isset($result['success']) && $result['success']) {
+                        rr_ai_log("Envío exitoso a $platform desde: $full_url", 'info');
+                        $platform_results[$platform] = $result;
+                        
+                        // Guardar metadatos
+                        update_post_meta($post_id, "_rr_sent_to_{$platform}", date('Y-m-d H:i:s'));
+                        if (isset($result['url'])) {
+                            update_post_meta($post_id, "_rr_{$platform}_url", $result['url']);
+                        }
+                        if (isset($result['title'])) {
+                            update_post_meta($post_id, "_rr_{$platform}_title", $result['title']);
+                        }
+                    } else {
+                        $error_msg = isset($result['error']) ? $result['error'] : 'Error desconocido';
+                        rr_ai_log("Error en respuesta de $platform: $error_msg", 'error');
+                        $all_success = false;
+                    }
+                } else {
+                    rr_ai_log("Código de respuesta $platform: $response_code - $response_body", 'error');
+                    $all_success = false;
+                }
+            }
+            
+            // Si al menos una plataforma fue exitosa desde esta URL
+            if (!empty($platform_results)) {
+                update_post_meta($post_id, '_rr_sent_to_ai', date('Y-m-d H:i:s'));
+                return true;
             }
         }
 
