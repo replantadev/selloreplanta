@@ -40,9 +40,14 @@ require_once RREPLANTA_AI_PLUGIN_DIR . 'inc/class-handler.php';
 require_once RREPLANTA_AI_PLUGIN_DIR . 'inc/diagnosis.php';
 require_once RREPLANTA_AI_PLUGIN_DIR . 'inc/recovery.php';
 require_once RREPLANTA_AI_PLUGIN_DIR . 'inc/deploy-status.php';
+require_once RREPLANTA_AI_PLUGIN_DIR . 'inc/testing.php';
 
 // Hook principal a publicación de posts
-add_action('publish_post', ['Replanta_Republish_AI', 'handle_new_post'], 10, 2);
+add_action('publish_post', function($post_id, $post) {
+    if (class_exists('Replanta_Republish_AI')) {
+        Replanta_Republish_AI::send_to_ai_service($post_id);
+    }
+}, 10, 2);
 
 // Activación del plugin
 register_activation_hook(__FILE__, function() {
@@ -144,6 +149,15 @@ add_action('admin_menu', function () {
         'manage_options',
         'replanta-republish-ai-class-test',
         'replanta_class_loader_test_page'
+    );
+    
+    add_submenu_page(
+        'replanta-republish-ai',
+        'Testing Automático',
+        'Testing Automático',
+        'manage_options',
+        'replanta-republish-ai-testing',
+        'replanta_testing_page'
     );
 });
 
