@@ -231,26 +231,26 @@ function dominios_reseller_inline_assets() {
     
     <script id="dominios-reseller-inline-js">
     jQuery(document).ready(function($) {
-        console.log('Dominios Reseller Inline JS v1.1.3 loaded');
+        console.log("Dominios Reseller Inline JS v1.1.3 loaded");
         
         // Tabs functionality
-        $('.tab-button').on('click', function() {
-            var targetTab = $(this).data('tab');
-            $('.tab-button').removeClass('active');
-            $('.tab-pane').removeClass('active');
-            $(this).addClass('active');
-            $('#' + targetTab + '-tab').addClass('active');
+        $(".tab-button").on("click", function() {
+            var targetTab = $(this).data("tab");
+            $(".tab-button").removeClass("active");
+            $(".tab-pane").removeClass("active");
+            $(this).addClass("active");
+            $("#" + targetTab + "-tab").addClass("active");
         });
         
         // Filter functionality
-        $('#server-filter, #status-filter').on('change', function() {
-            var serverFilter = $('#server-filter').val();
-            var statusFilter = $('#status-filter').val();
+        $("#server-filter, #status-filter").on("change", function() {
+            var serverFilter = $("#server-filter").val();
+            var statusFilter = $("#status-filter").val();
             
-            $('#unified-domains-table tbody tr').each(function() {
+            $("#unified-domains-table tbody tr").each(function() {
                 var $row = $(this);
-                var server = $row.data('server');
-                var status = $row.data('status');
+                var server = $row.data("server");
+                var status = $row.data("status");
                 var showRow = true;
                 
                 if (serverFilter && server !== serverFilter.toLowerCase()) {
@@ -269,7 +269,7 @@ function dominios_reseller_inline_assets() {
         });
         
         // Refresh functionality
-        $('.refresh-unified').on('click', function() {
+        $(".refresh-unified").on("click", function() {
             location.reload();
         });
     });
@@ -539,7 +539,7 @@ function mostrar_todos_los_dominios_unificados() {
                 'status' => $status,
                 'trees_planted' => 0,
                 'co2_evaded' => 0,
-                'primary_domain' => isset($domain_data['parent_domain']) ? $domain_data['parent_domain'] : null,
+                'primary_domain' => isset($domain_data['parent_domain']) ? $domain_data['parent_domain'] : $domain_data['domain'],
                 'is_primary' => $status !== 'Addon' ? 1 : 0
             ]);
         }
