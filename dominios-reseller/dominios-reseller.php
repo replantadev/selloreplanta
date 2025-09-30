@@ -58,8 +58,228 @@ add_action('admin_menu', function () {
     );
 });
 
+// Cargar assets inline como fallback
+function dominios_reseller_inline_assets() {
+    ?>
+    <style>
+    /* Dominios Reseller Inline CSS v1.1.3 */
+    .dominios-reseller-admin {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
+        max-width: none;
+        background: #f1f1f1;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin: 20px 0;
+    }
+    .header-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+    .header-section h1 {
+        margin: 0 0 10px 0;
+        font-size: 2.2em;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+    .header-section .description {
+        margin: 0;
+        font-size: 1.1em;
+        opacity: 0.9;
+    }
+    .server-tabs {
+        background: white;
+        min-height: 600px;
+    }
+    .tab-buttons {
+        display: flex;
+        background: #f8f9fa;
+        border-bottom: 2px solid #e9ecef;
+        margin: 0;
+        padding: 0;
+    }
+    .tab-button {
+        background: transparent;
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: #6c757d;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        padding: 15px 25px;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+    .tab-button:hover {
+        background: rgba(0,123,255,0.1);
+        color: #0056b3;
+    }
+    .tab-button.active {
+        background: rgba(0,123,255,0.05);
+        border-bottom-color: #007bff;
+        color: #0056b3;
+    }
+    .tab-pane {
+        display: none;
+        min-height: 500px;
+        padding: 30px;
+    }
+    .tab-pane.active {
+        display: block;
+    }
+    .unified-domains-table,
+    .domains-table {
+        background: white;
+        border-collapse: collapse;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+        width: 100%;
+    }
+    .unified-domains-table thead,
+    .domains-table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    .unified-domains-table th,
+    .domains-table th {
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        padding: 15px 12px;
+        text-align: left;
+        text-transform: uppercase;
+    }
+    .unified-domains-table td,
+    .domains-table td {
+        border-bottom: 1px solid #f1f3f4;
+        padding: 12px;
+        vertical-align: middle;
+    }
+    .suspended-row {
+        background-color: #fff5f5 !important;
+        border-left: 4px solid #ef4444 !important;
+    }
+    .server-badge {
+        border-radius: 12px;
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        padding: 4px 10px;
+        text-transform: uppercase;
+    }
+    .server-uk {
+        background: #3b82f6;
+        color: white;
+    }
+    .server-usa {
+        background: #ef4444;
+        color: white;
+    }
+    .status-badge {
+        border-radius: 12px;
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 8px;
+        text-transform: uppercase;
+    }
+    .status-active {
+        background: #dcfce7;
+        color: #166534;
+    }
+    .status-suspended {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    .filter-controls {
+        align-items: center;
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    .filter-select {
+        background: white;
+        border: 2px solid #e1e5e9;
+        border-radius: 6px;
+        font-size: 14px;
+        min-width: 150px;
+        padding: 8px 12px;
+    }
+    .save-all-unified, .refresh-unified {
+        border: none;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+        font-weight: 600;
+        margin-right: 10px;
+        padding: 12px 24px;
+    }
+    .save-all-unified {
+        background: #3b82f6;
+    }
+    .refresh-unified {
+        background: #6b7280;
+    }
+    </style>
+    
+    <script>
+    jQuery(document).ready(function($) {
+        console.log('Dominios Reseller Inline JS v1.1.3 loaded');
+        
+        // Tabs functionality
+        $('.tab-button').on('click', function() {
+            var targetTab = $(this).data('tab');
+            $('.tab-button').removeClass('active');
+            $('.tab-pane').removeClass('active');
+            $(this).addClass('active');
+            $('#' + targetTab + '-tab').addClass('active');
+        });
+        
+        // Filter functionality
+        $('#server-filter, #status-filter').on('change', function() {
+            var serverFilter = $('#server-filter').val();
+            var statusFilter = $('#status-filter').val();
+            
+            $('#unified-domains-table tbody tr').each(function() {
+                var $row = $(this);
+                var server = $row.data('server');
+                var status = $row.data('status');
+                var showRow = true;
+                
+                if (serverFilter && server !== serverFilter.toLowerCase()) {
+                    showRow = false;
+                }
+                if (statusFilter && status !== statusFilter) {
+                    showRow = false;
+                }
+                
+                if (showRow) {
+                    $row.show();
+                } else {
+                    $row.hide();
+                }
+            });
+        });
+        
+        // Refresh functionality
+        $('.refresh-unified').on('click', function() {
+            location.reload();
+        });
+    });
+    </script>
+    <?php
+}
+
 function dominios_reseller_admin_page() {
-    // Los estilos y scripts se cargan desde scripts.php, no aquí para evitar duplicación
+    // Inyectar CSS y JS inline como fallback si los archivos no existen
+    dominios_reseller_inline_assets();
 
     echo '<div class="wrap dominios-reseller-admin">';
     echo '<div class="header-section">';
