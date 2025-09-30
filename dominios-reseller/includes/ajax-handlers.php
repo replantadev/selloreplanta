@@ -58,19 +58,21 @@ function dominios_reseller_recalcular_co2()
     }
 
     $domain = sanitize_text_field($_POST['domain'] ?? '');
+    $server = sanitize_text_field($_POST['server'] ?? 'uk');
 
     if (!$domain) {
         wp_send_json_error(['message' => 'Dominio no válido.']);
     }
 
     $opts = get_option('dominios_reseller_options');
-    $token = sanitize_text_field($opts['whm_token'] ?? '');
+    $token_key = $server . '_whm_token';
+    $token = sanitize_text_field($opts[$token_key] ?? '');
 
     if (!$token) {
-        wp_send_json_error(['message' => 'API token no configurado.']);
+        wp_send_json_error(['message' => 'API token no configurado para el servidor ' . strtoupper($server) . '.']);
     }
 
-    $nuevo_co2 = recalcular_co2_para_dominio($domain, $token);
+    $nuevo_co2 = recalcular_co2_para_dominio($domain, $token, $server);
 
     if ($nuevo_co2 !== false) {
         wp_send_json_success(['co2_evaded' => $nuevo_co2]);

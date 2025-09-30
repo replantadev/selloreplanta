@@ -27,9 +27,10 @@ function calcular_co2_ev($trafico_bytes, $dias_activo)
  *
  * @param string $domain
  * @param string $api_token
+ * @param string $server
  * @return float|false Nuevo CO2 calculado o false si error.
  */
-function recalcular_co2_para_dominio($domain, $api_token)
+function recalcular_co2_para_dominio($domain, $api_token, $server = 'uk')
 {
     global $wpdb;
     $table = $wpdb->prefix . 'dominios_reseller';
@@ -39,9 +40,9 @@ function recalcular_co2_para_dominio($domain, $api_token)
     if (!$row) return false;
 
     $fecha_emision = $row->fecha_emision ? strtotime($row->fecha_emision) : strtotime('-30 days');
-    $dias_activo = max(1, round((time() - $fecha_emision) / DAY_IN_SECONDS));
+    $dias_activo = max(1, round((time() - $fecha_emision) / 86400));
 
-    $trafico = obtener_trafico_real($domain, $api_token);
+    $trafico = obtener_trafico_real($domain, $api_token, $server);
 
     if ($trafico === false) return false;
 
@@ -50,58 +51,4 @@ function recalcular_co2_para_dominio($domain, $api_token)
     $wpdb->update($table, ['co2_evaded' => $co2_ev], ['domain' => $domain]);
 
     return $co2_ev;
-}
-
-function obtener_trafico_real($domain, $token) {
-    $mes = date('n'); // mes actual
-    $anio = date('Y');
-
-    $url = "https://s708.lon1.mysecurecloudhost.com:2087/json-api/showbw?api.version=1&searchtype=domain&search=$domain";
-
-    $curl = curl_init();
-    curl_setopt_array($curl, [
-        CURLOPT_URL => $url,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_SSL_VERIFYHOST => false,
-        CURLOPT_HTTPHEADER => ["Authorization: whm replanta:$token"],
-        CURLOPT_TIMEOUT => 30,
-        CURLOPT_CONNECTTIMEOUT => 10
-    ]);
-
-    $resp = curl_exec($curl);
-    $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-    
-    if ($resp === false) {
-        error_log("[Dominios Reseller] Error al obtener tráfico para $domain: " . curl_error($curl));
-        curl_close($curl);
-        return false;
-    }
-    
-    if ($http_code !== 200) {
-        error_log("[Dominios Reseller] HTTP Error $http_code para tráfico de $domain");
-        curl_close($curl);
-        return false;
-    }
-
-    curl_close($curl);
-    $data = json_decode($resp, true);
-
-    if (!is_array($data) || empty($data['data']['acct'])) {
-        error_log("[Dominios Reseller] WHM: Sin datos de tráfico para $domain. Respuesta: " . print_r($data, true));
-        return false;
-    }
-
-    foreach ($data['data']['acct'] as $acct) {
-        if (!empty($acct['bwusage']) && is_array($acct['bwusage'])) {
-            foreach ($acct['bwusage'] as $entry) {
-                if (isset($entry['domain']) && $entry['domain'] === $domain && isset($entry['usage'])) {
-                    return intval($entry['usage']); // en bytes
-                }
-            }
-        }
-    }
-
-    error_log("[Dominios Reseller] WHM: No se encontró tráfico específico para $domain en respuesta");
-    return false;
 }

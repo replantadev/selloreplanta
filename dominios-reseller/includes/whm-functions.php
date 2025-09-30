@@ -162,10 +162,15 @@ function mostrar_lista_dominios()
     echo '<button id="guardar-cambios" class="button button-primary">Guardar cambios</button>';
 }
 
-function obtener_cuentas_whm($token)
+function obtener_cuentas_whm($token, $server = 'uk')
 {
-    // Usar IP directa para evitar problemas con Cloudflare
-    $url = 'https://77.95.113.38:2087/json-api/listaccts?api.version=1';
+    $servers = [
+        'uk' => '77.95.113.38',
+        'usa' => '190.92.170.164'
+    ];
+
+    $server_ip = $servers[$server] ?? $servers['uk'];
+    $url = 'https://' . $server_ip . ':2087/json-api/listaccts?api.version=1';
 
     $curl = curl_init();
     curl_setopt_array($curl, [
@@ -180,19 +185,19 @@ function obtener_cuentas_whm($token)
 
     $resp = curl_exec($curl);
     $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-    
+
     if ($resp === false) {
         error_log('[Dominios Reseller] Error WHM: ' . curl_error($curl));
         curl_close($curl);
         return false;
     }
-    
+
     if ($http_code !== 200) {
         error_log("[Dominios Reseller] HTTP Error $http_code en listaccts. Respuesta: " . substr($resp, 0, 500));
         curl_close($curl);
         return false;
     }
-    
+
     curl_close($curl);
 
     $response_array = json_decode($resp, true);
@@ -210,9 +215,15 @@ function obtener_cuentas_whm($token)
     return $response_array;
 }
 
-function obtener_addons_de_usuario($cpanel_user, $token)
+function obtener_addons_de_usuario($cpanel_user, $token, $server = 'uk')
 {
-    $query = "https://77.95.113.38:2087/json-api/cpanel?cpanel_jsonapi_user={$cpanel_user}&cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=AddonDomain&cpanel_jsonapi_func=listaddondomains";
+    $servers = [
+        'uk' => '77.95.113.38',
+        'usa' => '190.92.170.164'
+    ];
+
+    $server_ip = $servers[$server] ?? $servers['uk'];
+    $query = "https://" . $server_ip . ":2087/json-api/cpanel?cpanel_jsonapi_user={$cpanel_user}&cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=AddonDomain&cpanel_jsonapi_func=listaddondomains";
 
     $curl = curl_init();
     curl_setopt_array($curl, [
@@ -227,13 +238,13 @@ function obtener_addons_de_usuario($cpanel_user, $token)
 
     $resp = curl_exec($curl);
     $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-    
+
     if ($resp === false) {
         error_log("[Dominios Reseller] Error en obtener_addons_de_usuario para $cpanel_user: " . curl_error($curl));
         curl_close($curl);
         return [];
     }
-    
+
     if ($http_code !== 200) {
         error_log("[Dominios Reseller] HTTP Error $http_code para addons de $cpanel_user. Respuesta: " . substr($resp, 0, 500));
         curl_close($curl);
@@ -242,17 +253,75 @@ function obtener_addons_de_usuario($cpanel_user, $token)
 
     curl_close($curl);
     $data = json_decode($resp, true);
-    
+
     // VALIDACIÓN ROBUSTA: Verificar estructura de respuesta
     if (!is_array($data)) {
         error_log("[Dominios Reseller] Respuesta no es array para addons de $cpanel_user: " . substr($resp, 0, 200));
         return [];
     }
-    
+
     if (!isset($data['cpanelresult']['data']) || !is_array($data['cpanelresult']['data'])) {
         error_log("[Dominios Reseller] Estructura inválida en addons para $cpanel_user: " . print_r($data, true));
         return [];
     }
-    
+
     return $data['cpanelresult']['data'];
+}
+
+function obtener_trafico_real($domain, $token, $server = 'uk')
+{
+    $servers = [
+        'uk' => '77.95.113.38',
+        'usa' => '190.92.170.164'
+    ];
+
+    $server_ip = $servers[$server] ?? $servers['uk'];
+    $url = "https://" . $server_ip . ":2087/json-api/showbw?api.version=1&searchtype=domain&search=" . urlencode($domain);
+
+    $curl = curl_init();
+    curl_setopt_array($curl, [
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false,
+        CURLOPT_HTTPHEADER => ["Authorization: whm replanta:$token"],
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_CONNECTTIMEOUT => 10
+    ]);
+
+    $resp = curl_exec($curl);
+    $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+    if ($resp === false) {
+        error_log("[Dominios Reseller] Error al obtener tráfico para $domain: " . curl_error($curl));
+        curl_close($curl);
+        return false;
+    }
+
+    if ($http_code !== 200) {
+        error_log("[Dominios Reseller] HTTP Error $http_code para tráfico de $domain");
+        curl_close($curl);
+        return false;
+    }
+
+    curl_close($curl);
+    $data = json_decode($resp, true);
+
+    if (!is_array($data) || empty($data['data']['acct'])) {
+        error_log("[Dominios Reseller] WHM: Sin datos de tráfico para $domain. Respuesta: " . print_r($data, true));
+        return false;
+    }
+
+    foreach ($data['data']['acct'] as $acct) {
+        if (!empty($acct['bwusage']) && is_array($acct['bwusage'])) {
+            foreach ($acct['bwusage'] as $entry) {
+                if (isset($entry['domain']) && $entry['domain'] === $domain && isset($entry['usage'])) {
+                    return intval($entry['usage']); // en bytes
+                }
+            }
+        }
+    }
+
+    error_log("[Dominios Reseller] WHM: No se encontró tráfico específico para $domain en respuesta");
+    return false;
 }

@@ -1,0 +1,29 @@
+# Dominios Reseller Assets Security
+<IfModule mod_mime.c>
+    # CSS Files
+    AddType text/css .css
+    
+    # JavaScript Files
+    AddType application/javascript .js
+    AddType text/javascript .js
+</IfModule>
+
+# Enable caching for static assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+</IfModule>
+
+# Prevent direct access to PHP files
+<Files "*.php">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Allow access to CSS and JS files
+<FilesMatch "\.(css|js)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
