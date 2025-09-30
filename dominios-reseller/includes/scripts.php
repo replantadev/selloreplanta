@@ -4,10 +4,15 @@ if (!defined('ABSPATH')) exit;
 
 /**
  * Carga scripts y estilos en la página del plugin
+ * DESACTIVADO - Usando CSS/JS inline en el archivo principal
  */
 add_action('admin_enqueue_scripts', function ($hook) {
     if ($hook !== 'toplevel_page_dominios-reseller') return;
 
+    // DESACTIVADO: CSS/JS inline se carga desde dominios_reseller_inline_assets()
+    // Los assets externos causan errores 404 por symlink
+    
+    /*
     // Obtener la URL base del plugin correctamente
     $plugin_url = plugin_dir_url(dirname(__FILE__));
     $version = DOMINIOS_RESELLER_VERSION;
@@ -28,7 +33,10 @@ add_action('admin_enqueue_scripts', function ($hook) {
         $version,
         true
     );
+    */
 
+    // DESACTIVADO: Localización también comentada
+    /*
     // Localización para AJAX
     wp_localize_script('dominios-reseller-admin-js', 'dominios_reseller_ajax', [
         'ajax_url' => admin_url('admin-ajax.php'),
@@ -39,6 +47,7 @@ add_action('admin_enqueue_scripts', function ($hook) {
 
     // También definir ajaxurl globalmente para compatibilidad
     wp_localize_script('dominios-reseller-admin-js', 'ajaxurl', admin_url('admin-ajax.php'));
+    */
 });
 
 /**
