@@ -354,6 +354,9 @@ function mostrar_todos_los_dominios_unificados() {
     $uk_token = $options['uk_whm_token'] ?? '';
     $usa_token = $options['usa_whm_token'] ?? '';
 
+    // Debug: mostrar estado de tokens
+    echo '<div class="notice notice-info"><p>🔧 DEBUG: Token UK ' . (empty($uk_token) ? 'NO configurado' : 'configurado') . ' | Token USA ' . (empty($usa_token) ? 'NO configurado' : 'configurado') . '</p></div>';
+
     $all_domains = [];
 
     // Obtener dominios del servidor UK
@@ -394,8 +397,11 @@ function mostrar_todos_los_dominios_unificados() {
 
     // Obtener dominios del servidor USA
     if (!empty($usa_token)) {
+        echo '<div class="notice notice-info"><p>🔄 Obteniendo dominios del servidor USA...</p></div>';
         $usa_accounts = obtener_cuentas_whm($usa_token, 'usa');
+        
         if ($usa_accounts && !empty($usa_accounts['data']['acct'])) {
+            echo '<div class="notice notice-success"><p>✅ Encontrados ' . count($usa_accounts['data']['acct']) . ' dominios en servidor USA</p></div>';
             foreach ($usa_accounts['data']['acct'] as $cuenta) {
                 $domain_data = [
                     'domain' => $cuenta['domain'],
@@ -429,9 +435,27 @@ function mostrar_todos_los_dominios_unificados() {
     }
 
     if (empty($all_domains)) {
+        echo '            }
+        } else {
+            echo '<div class="notice notice-warning"><p>⚠️ No se encontraron cuentas en servidor USA o hubo un error de conexión.</p></div>';
+        }
+    } else {
+        echo '<div class="notice notice-error"><p>❌ Token USA no configurado</p></div>';
+    }
+
+    // Debug: mostrar total de dominios encontrados
+    $uk_count = count(array_filter($all_domains, function($d) { return $d['server'] === 'UK'; }));
+    $usa_count = count(array_filter($all_domains, function($d) { return $d['server'] === 'USA'; }));
+    echo '<div class="notice notice-info"><p>🔧 DEBUG: Total dominios encontrados: ' . count($all_domains) . ' (UK: ' . $uk_count . ', USA: ' . $usa_count . ')</p></div>';
+
+    if (empty($all_domains)) {
         echo '<div class="notice notice-warning"><p>⚠️ No se encontraron dominios en ningún servidor. Verifica que los tokens WHM estén configurados correctamente.</p></div>';
         return;
     }
+
+    // Filtros y tabla
+    echo '<div class="unified-header">';
+    echo '<h3>📊 Todos los Dominios Unificados</h3>';
 
     global $wpdb;
     $tabla = $wpdb->prefix . 'dominios_reseller';
