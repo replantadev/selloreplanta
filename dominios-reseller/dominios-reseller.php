@@ -58,11 +58,11 @@ add_action('admin_menu', function () {
     );
 });
 
-// Cargar assets inline como fallback
+// Cargar assets inline como fallback - SIEMPRE
 function dominios_reseller_inline_assets() {
-    ?>
-    <style>
-    /* Dominios Reseller Inline CSS v1.1.3 */
+    // Forzar carga inline para desarrollo rápido
+    echo '<style id="dominios-reseller-inline-css">
+    /* Dominios Reseller Inline CSS v1.1.3 - FORCED LOAD */
     .dominios-reseller-admin {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
         max-width: none;
@@ -229,7 +229,7 @@ function dominios_reseller_inline_assets() {
     }
     </style>
     
-    <script>
+    <script id="dominios-reseller-inline-js">
     jQuery(document).ready(function($) {
         console.log('Dominios Reseller Inline JS v1.1.3 loaded');
         
@@ -273,8 +273,7 @@ function dominios_reseller_inline_assets() {
             location.reload();
         });
     });
-    </script>
-    <?php
+    </script>';
 }
 
 function dominios_reseller_admin_page() {
