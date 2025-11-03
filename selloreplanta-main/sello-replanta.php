@@ -3,14 +3,13 @@
 /**
  * Plugin Name: Sello Replanta PRO
  * Description: Sello de carbono negativo inteligente que se adapta a cualquier page builder (Elementor, Divi, etc.). Versión PRO con detección avanzada.
- * Version: 2.0.2
+ * Version: 2.0.3
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: sello-replanta
- * Domain Path: /langu    // Generar el HTML del sello con configuración PRO
-    echo '<div id="sello-replanta-container" class="' . esc_attr($positioning_class) . ' sello-size-' . esc_attr($size) . ' sello-zindex-' . esc_attr($zindex) . '"' . $style_attr . ' data-position="' . esc_attr($position) . '" data-builders="' . esc_attr(implode(',', $page_builders)) . '" data-zindex="' . esc_attr($zindex_value) . '" data-margin="' . esc_attr($margin) . '">';es
+ * Domain Path: /languages/
  * GitHub Plugin URI: https://github.com/replantadev/selloreplanta
  */
 
@@ -21,7 +20,7 @@ if (!defined('ABSPATH')) {
 
 define('SR_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('SR_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('SR_VERSION', '2.0.1');
+define('SR_VERSION', '2.0.3');
 
 // Detectar page builders activos
 add_action('init', 'sello_replanta_detect_page_builders');
@@ -243,15 +242,9 @@ function sello_replanta_setting_opacity()
 function sello_replanta_setting_zindex()
 {
     $options = get_option('sello_replanta_options');
-    $zindex = isset($options['zindex']) ? $options['zindex'] : 'auto';
-    echo "<select id='sello_replanta_zindex' name='sello_replanta_options[zindex]'>
-            <option value='auto'" . selected($zindex, 'auto', false) . ">Automático (9999)</option>
-            <option value='low'" . selected($zindex, 'low', false) . ">Bajo (100) - Debajo de chats</option>
-            <option value='medium'" . selected($zindex, 'medium', false) . ">Medio (1000)</option>
-            <option value='high'" . selected($zindex, 'high', false) . ">Alto (9999)</option>
-            <option value='higher'" . selected($zindex, 'higher', false) . ">Muy Alto (99999)</option>
-          </select>";
-    echo "<p class='description'>Controla si el sello aparece por encima o debajo de chats y otros elementos flotantes.</p>";
+    $zindex = isset($options['zindex']) ? $options['zindex'] : '9999';
+    echo "<input type='number' id='sello_replanta_zindex' name='sello_replanta_options[zindex]' value='" . esc_attr($zindex) . "' min='1' max='999999' step='1' style='width: 100px;' />";
+    echo "<p class='description'>Controla el orden de apilamiento (z-index). Valores comunes: 100 (debajo de chats), 1000 (medio), 9999 (alto), 99999 (muy alto).</p>";
 }
 
 function sello_replanta_setting_margin()
@@ -274,8 +267,8 @@ function sello_replanta_options_validate($input)
         ? sanitize_text_field($input['size']) : 'normal';
     $newinput['opacity'] = floatval($input['opacity']) >= 0.3 && floatval($input['opacity']) <= 1.0 
         ? floatval($input['opacity']) : 1.0;
-    $newinput['zindex'] = in_array($input['zindex'], ['auto', 'low', 'medium', 'high', 'higher']) 
-        ? sanitize_text_field($input['zindex']) : 'auto';
+    $newinput['zindex'] = intval($input['zindex']) >= 1 && intval($input['zindex']) <= 999999 
+        ? intval($input['zindex']) : 9999;
     $newinput['margin'] = intval($input['margin']) >= 0 && intval($input['margin']) <= 200 
         ? intval($input['margin']) : 0;
     return $newinput;

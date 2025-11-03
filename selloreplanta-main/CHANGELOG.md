@@ -1,5 +1,16 @@
 # Changelog - Sello Replanta
 
+## [2.0.3] - 2025-11-03 🧹 CLEAN & OPTIMIZED
+
+### ✨ MEJORAS DE CÓDIGO
+- **VERIFICADO**: Control de Z-Index ya implementado como input numérico (no rango) para ajuste fino
+- **LIMPIO**: Código JavaScript sin mensajes de consola (ya estaba limpio)
+- **ACTUALIZADO**: Versiones sincronizadas en todos los archivos del plugin
+
+### 📝 MANTENIMIENTO
+- **SINCRONIZADO**: Versión 2.0.3 en PHP header, SR_VERSION y readme.txt
+- **DOCUMENTADO**: CHANGELOG actualizado con estado actual del plugin
+
 ## [2.0.2] - 2025-09-07 🎯 BEAVER BUILDER + ASTRA FIX
 
 ### 🚨 PROBLEMA RESUELTO: Posicionamiento en Beaver + Astra
