@@ -1,0 +1,66 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Sello Replanta 1.0.8\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-05-04 00:00+0000\n"
+"PO-Revision-Date: 2025-05-04 00:00+0000\n"
+"Last-Translator: Replanta <support@replanta.net>\n"
+"Language-Team: Spanish\n"
+"Language: es_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.0\n"
+"X-Domain: sello-replanta\n"
+
+#: sello-replanta.php:17
+msgid "Sello Replanta"
+msgstr "Sello Replanta"
+
+#: sello-replanta.php:18
+msgid "Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta."
+msgstr "Muestra un sello de Replanta en el pie de página si el dominio está alojado en Replanta."
+
+#: sello-replanta.php:65
+msgid "El dominio está alojado en Replanta."
+msgstr "El dominio está alojado en Replanta."
+
+#: sello-replanta.php:71
+msgid "El dominio no está alojado en Replanta."
+msgstr "El dominio no está alojado en Replanta."
+
+#: sello-replanta.php:103
+msgid "Configuración Principal"
+msgstr "Configuración Principal"
+
+#: sello-replanta.php:104
+msgid "Configure las opciones del Sello Replanta."
+msgstr "Configure las opciones del Sello Replanta."
+
+#: sello-replanta.php:108
+msgid "Modo"
+msgstr "Modo"
+
+#: sello-replanta.php:109
+msgid "Claro"
+msgstr "Claro"
+
+#: sello-replanta.php:110
+msgid "Oscuro"
+msgstr "Oscuro"
+
+#: sello-replanta.php:114
+msgid "Color de Fondo"
+msgstr "Color de Fondo"
+
+#: sello-replanta.php:115
+msgid "Ejemplo: #ffffff"
+msgstr "Ejemplo: #ffffff"
+
+#: sello-replanta.php:116
+msgid "Deja este campo vacío para usar el color detectado automáticamente."
+msgstr "Deja este campo vacío para usar el color detectado automáticamente."
+
+#: sello-replanta.php:145
+msgid "Alojamiento web ecológico"
+msgstr "Alojamiento web ecológico"
