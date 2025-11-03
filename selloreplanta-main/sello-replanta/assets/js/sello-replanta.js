@@ -70,18 +70,11 @@
             const container = document.getElementById('sello-replanta-container');
             if (!container) return;
 
-            console.log('🌱 Sello Replanta PRO v2.0.1 - Iniciando detección inteligente');
-
             // Obtener configuración del contenedor
             const position = container.dataset.position || 'auto';
             const builders = (container.dataset.builders || '').split(',').filter(Boolean);
             const zindexValue = container.dataset.zindex || '9999';
             const margin = container.dataset.margin || '0';
-
-            console.log('📊 Page builders detectados:', builders);
-            console.log('📍 Posición configurada:', position);
-            console.log('🔢 Z-index configurado:', zindexValue);
-            console.log('📏 Margen inferior:', margin + 'px');
 
             // Detectar conflictos con chats y otros plugins
             this.detectAndFixConflicts(container);
@@ -120,19 +113,15 @@
             }
 
             if (chatDetected) {
-                console.log('💬 Chats detectados:', detectedChats);
-                
                 // Si el z-index es automático y hay chats, bajarlo
                 const zindexClass = container.className.match(/sello-zindex-(\w+)/);
                 if (zindexClass && zindexClass[1] === 'auto') {
-                    console.log('🔧 Ajustando z-index automáticamente para evitar conflictos con chats');
                     container.style.zIndex = '99';
                 }
 
                 // Añadir margen adicional si no está configurado
                 const currentMargin = parseInt(container.dataset.margin || '0');
                 if (currentMargin === 0) {
-                    console.log('📏 Añadiendo margen automático para chats');
                     container.style.marginBottom = '70px';
                 }
 
@@ -170,11 +159,8 @@
 
             // Si encontramos un target, posicionar ahí
             if (targetInfo && targetInfo.element) {
-                console.log('🎯 Target encontrado:', targetInfo.element.tagName, targetInfo.element.className || targetInfo.element.id);
-                console.log('📍 Estrategia de inserción:', targetInfo.strategy);
                 this.insertIntoTarget(container, targetInfo.element, targetInfo.strategy);
             } else {
-                console.log('⚠️ No se encontró target específico, usando body');
                 document.body.appendChild(container);
             }
         },
@@ -184,7 +170,6 @@
             for (const selector of this.selectors.elementor) {
                 const element = document.querySelector(selector);
                 if (element) {
-                    console.log('✅ Footer Elementor encontrado:', selector);
                     return { element: element, strategy: 'after' };
                 }
             }
@@ -196,7 +181,6 @@
             for (const selector of this.selectors.themeFooters) {
                 const element = document.querySelector(selector);
                 if (element && this.isVisible(element)) {
-                    console.log('✅ Footer de tema encontrado:', selector);
                     return { element: element, strategy: 'after' };
                 }
             }
@@ -205,7 +189,6 @@
             for (const selector of this.selectors.generic) {
                 const element = document.querySelector(selector);
                 if (element && this.isVisible(element)) {
-                    console.log('✅ Footer genérico encontrado:', selector);
                     return { element: element, strategy: 'after' };
                 }
             }
@@ -213,20 +196,15 @@
         },
 
         findBestTarget: function(builders) {
-            console.log('🔍 Buscando mejor target para inserción...');
-            
             // PASO 1: PRIORIDAD MÁXIMA - Buscar footers de temas
-            console.log('🎯 Paso 1: Buscando footers de temas (Astra, GeneratePress, etc.)');
             for (const selector of this.selectors.themeFooters) {
                 const element = document.querySelector(selector);
                 if (element && this.isVisible(element)) {
-                    console.log('✅ Footer de tema encontrado:', selector);
                     return { element: element, strategy: 'after' };
                 }
             }
 
             // PASO 2: Buscar footers de page builders específicos
-            console.log('🎯 Paso 2: Buscando footers de page builders');
             const searchOrder = [];
 
             if (builders.includes('elementor')) {
@@ -242,22 +220,18 @@
             for (const selector of searchOrder) {
                 const element = document.querySelector(selector);
                 if (element && this.isVisible(element)) {
-                    console.log('✅ Footer de page builder encontrado:', selector);
                     return { element: element, strategy: 'after' };
                 }
             }
             
             // PASO 3: Fallbacks genéricos
-            console.log('🎯 Paso 3: Buscando fallbacks genéricos');
             for (const selector of this.selectors.generic) {
                 const element = document.querySelector(selector);
                 if (element && this.isVisible(element)) {
-                    console.log('✅ Fallback encontrado:', selector);
                     return { element: element, strategy: 'append' };
                 }
             }
 
-            console.log('⚠️ No se encontró target específico, usando body');
             return { element: document.body, strategy: 'append' };
         },
 
@@ -271,19 +245,16 @@
                         } else {
                             target.parentNode.appendChild(container);
                         }
-                        console.log('✅ Sello insertado DESPUÉS de:', target.tagName, target.className || target.id);
                         break;
                         
                     case 'append':
                         // Insertar DENTRO del elemento al final
                         target.appendChild(container);
-                        console.log('✅ Sello insertado DENTRO de:', target.tagName, target.className || target.id);
                         break;
                         
                     case 'prepend':
                         // Insertar DENTRO del elemento al principio
                         target.insertBefore(container, target.firstChild);
-                        console.log('✅ Sello insertado AL PRINCIPIO de:', target.tagName, target.className || target.id);
                         break;
                         
                     default:
@@ -291,7 +262,6 @@
                         break;
                 }
             } catch (error) {
-                console.warn('⚠️ Error insertando sello, usando body:', error);
                 document.body.appendChild(container);
             }
         },
@@ -330,7 +300,6 @@
                         
                         if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
                             backgroundColor = bgColor;
-                            console.log('🎨 Color detectado desde:', element.tagName, bgColor);
                             break;
                         }
                     }
@@ -340,7 +309,6 @@
                 container.style.backgroundColor = backgroundColor || '#ffffff';
                 
             } catch (error) {
-                console.warn('⚠️ Error detectando color, usando blanco:', error);
                 container.style.backgroundColor = '#ffffff';
             }
         },
@@ -350,8 +318,6 @@
             container.style.display = 'block';
             container.style.visibility = 'visible';
             container.classList.add('sello-animate');
-
-            console.log('✅ Sello Replanta PRO mostrado correctamente');
         },
 
         isVisible: function(element) {
@@ -363,7 +329,6 @@
         fallbackInit: function() {
             const container = document.getElementById('sello-replanta-container');
             if (container && (container.style.display === 'none' || !container.parentNode)) {
-                console.log('🔄 Ejecutando fallback de inicialización');
                 this.initSello();
             }
         },

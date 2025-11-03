@@ -149,6 +149,7 @@ function mostrar_lista_dominios()
                 'status'         => $activo,
                 'trees_planted'  => 0,
                 'co2_evaded'     => 0,
+                'primary_domain' => $dominio,
                 'is_primary'     => 1
             ]);
             // actualizar objeto local

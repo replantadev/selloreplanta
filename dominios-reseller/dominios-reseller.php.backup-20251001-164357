@@ -54,36 +54,14 @@ function dominios_reseller_upgrade_table() {
                                 WHERE table_name = '$table' AND column_name = 'server'");
     if(empty($row)) {
         $wpdb->query("ALTER TABLE $table ADD COLUMN server varchar(10) NOT NULL DEFAULT 'uk' AFTER domain");
-        
-        // Eliminar índice UNIQUE anterior si existe
-        $wpdb->query("ALTER TABLE $table DROP INDEX domain, ADD KEY idx_domain_old (domain)");
-        
-        // Añadir nuevo índice único compuesto (domain + server)
-        // Primero verificar que no haya duplicados
-        $duplicates = $wpdb->get_results("
-            SELECT domain, server, COUNT(*) as count 
-            FROM $table 
-            GROUP BY domain, server 
-            HAVING count > 1
-        ");
-        
-        if (!empty($duplicates)) {
-            // Eliminar duplicados dejando el más reciente
-            foreach ($duplicates as $dup) {
-                $wpdb->query($wpdb->prepare("
-                    DELETE t1 FROM $table t1
-                    INNER JOIN $table t2 
-                    WHERE t1.id < t2.id 
-                    AND t1.domain = %s 
-                    AND t1.server = %s
-                ", $dup->domain, $dup->server));
-            }
-        }
-        
-        // Ahora sí añadir el índice único
         $wpdb->query("ALTER TABLE $table ADD UNIQUE KEY domain_server (domain, server)");
         $wpdb->query("ALTER TABLE $table ADD KEY idx_server (server)");
     }
+    
+    // Añadir índices si no existen
+    $wpdb->query("ALTER TABLE $table ADD KEY IF NOT EXISTS idx_domain (domain)");
+    $wpdb->query("ALTER TABLE $table ADD KEY IF NOT EXISTS idx_status (status)");
+    $wpdb->query("ALTER TABLE $table ADD KEY IF NOT EXISTS idx_primary (is_primary)");
     
     // Cambiar co2_evaded a DECIMAL para mayor precisión
     $wpdb->query("ALTER TABLE $table MODIFY co2_evaded decimal(10,2) DEFAULT 0");
@@ -243,16 +221,6 @@ add_action('admin_menu', function () {
         'dominios_reseller_admin_page',
         'dashicons-cloud',
         56
-    );
-    
-    // Submenu de diagnóstico (oculto, solo accesible por URL)
-    add_submenu_page(
-        null, // No aparece en menú
-        'Diagnóstico',
-        'Diagnóstico',
-        'manage_options',
-        'dominios-reseller-diagnostic',
-        'dominios_reseller_diagnostic_page'
     );
 });
 
@@ -606,23 +574,109 @@ function mostrar_todos_los_dominios_unificados() {
         return;
     }
 
-    // Obtener TODOS los dominios desde la base de datos local (objetos stdClass)
+    // Obtener TODOS los dominios desde la base de datos local
     $all_domains = $wpdb->get_results("SELECT * FROM $tabla ORDER BY server, domain");
 
+    // Obtener dominios del servidor UK
+    if (!empty($uk_token)) {
+        $uk_accounts = obtener_cuentas_whm($uk_token, 'uk');
+        if ($uk_accounts && !empty($uk_accounts['data']['acct'])) {
+            foreach ($uk_accounts['data']['acct'] as $cuenta) {
+                $domain_data = [
+                    'domain' => $cuenta['domain'],
+                    'server' => 'UK',
+                    'server_ip' => '77.95.113.38',
+                    'status' => $cuenta['suspended'] ? 'Suspendido' : 'Activo',
+                    'startdate' => $cuenta['unix_startdate'],
+                    'user' => $cuenta['user']
+                ];
+                $all_domains[] = $domain_data;
+
+                // Añadir addon domains
+                $addons = obtener_addons_de_usuario($cuenta['user'], $uk_token, 'uk');
+                if (is_array($addons)) {
+                    foreach ($addons as $addon) {
+                        if (is_array($addon) && isset($addon['domain'])) {
+                            $all_domains[] = [
+                                'domain' => $addon['domain'],
+                                'server' => 'UK',
+                                'server_ip' => '77.95.113.38',
+                                'status' => 'Addon',
+                                'startdate' => $cuenta['unix_startdate'],
+                                'user' => $cuenta['user'],
+                                'parent_domain' => $cuenta['domain']
+                            ];
+                        }
+                    }
+                }
+            }
+        } else {
+            echo '<div class="notice notice-warning"><p>⚠️ No se encontraron dominios activos en el servidor UK o hubo un error de conexión.</p></div>';
+        }
+    } else {
+        echo '<div class="notice notice-warning"><p>ℹ️ Token UK no configurado. Solo se mostrarán dominios de los servidores con token activo.</p></div>';
+    }
+
+    // Obtener dominios del servidor USA
+    if (!empty($usa_token)) {
+        echo '<div class="notice notice-info"><p>🔄 Obteniendo dominios del servidor USA...</p></div>';
+        $usa_accounts = obtener_cuentas_whm($usa_token, 'usa');
+
+        if ($usa_accounts && !empty($usa_accounts['data']['acct'])) {
+            echo '<div class="notice notice-success"><p>✅ Encontrados ' . count($usa_accounts['data']['acct']) . ' dominios en servidor USA</p></div>';
+
+            foreach ($usa_accounts['data']['acct'] as $cuenta) {
+                $domain_data = [
+                    'domain'     => $cuenta['domain'],
+                    'server'     => 'USA',
+                    'server_ip'  => '190.92.170.164',
+                    'status'     => $cuenta['suspended'] ? 'Suspendido' : 'Activo',
+                    'startdate'  => $cuenta['unix_startdate'],
+                    'user'       => $cuenta['user']
+                ];
+                $all_domains[] = $domain_data;
+
+                // Añadir addon domains
+                $addons = obtener_addons_de_usuario($cuenta['user'], $usa_token, 'usa');
+                if (is_array($addons)) {
+                    foreach ($addons as $addon) {
+                        if (is_array($addon) && isset($addon['domain'])) {
+                            $all_domains[] = [
+                                'domain'        => $addon['domain'],
+                                'server'        => 'USA',
+                                'server_ip'     => '190.92.170.164',
+                                'status'        => 'Addon',
+                                'startdate'     => $cuenta['unix_startdate'],
+                                'user'          => $cuenta['user'],
+                                'parent_domain' => $cuenta['domain']
+                            ];
+                        }
+                    }
+                }
+            }
+        } else {
+            echo '<div class="notice notice-warning"><p>⚠️ No se encontraron dominios activos en el servidor USA o hubo un error de conexión.</p></div>';
+        }
+    } else {
+        echo '<div class="notice notice-error"><p>❌ Token USA no configurado</p></div>';
+    }
+
+    // Debug: mostrar total de dominios encontrados
+    $uk_count = count(array_filter($all_domains, function($d) { return $d['server'] === 'UK'; }));
+    $usa_count = count(array_filter($all_domains, function($d) { return $d['server'] === 'USA'; }));
+    echo '<div class="notice notice-info"><p>🔧 DEBUG: Total dominios encontrados: ' . count($all_domains) . ' (UK: ' . $uk_count . ', USA: ' . $usa_count . ')</p></div>';
+
     if (empty($all_domains)) {
-        echo '<div class="notice notice-warning"><p>⚠️ No hay dominios en la base de datos. Los dominios se sincronizarán automáticamente al cargar esta página.</p></div>';
+        echo '<div class="notice notice-warning"><p>⚠️ No se encontraron dominios en ningún servidor. Verifica que los tokens WHM estén configurados correctamente.</p></div>';
         return;
     }
 
-    // Contar por servidor
-    $uk_count = 0;
-    $usa_count = 0;
-    foreach ($all_domains as $d) {
-        if (strtolower($d->server) === 'uk') $uk_count++;
-        if (strtolower($d->server) === 'usa') $usa_count++;
-    }
-    
-    echo '<div class="notice notice-info"><p>� Total: ' . count($all_domains) . ' dominios (UK: ' . $uk_count . ' | USA: ' . $usa_count . ')</p></div>';
+    // Filtros y tabla
+    echo '<div class="unified-header">';
+    echo '<h3>📊 Todos los Dominios Unificados</h3>';
+
+    global $wpdb;
+    $tabla = $wpdb->prefix . 'dominios_reseller';
 
     echo '<div class="domains-unified-container">';
     echo '<div class="unified-header">';
@@ -654,17 +708,32 @@ function mostrar_todos_los_dominios_unificados() {
     echo '<th class="actions-col">Acciones</th>';
     echo '</tr></thead><tbody>';
 
-    foreach ($all_domains as $row) {
-        // $row es un objeto stdClass de la base de datos
-        $dominio = esc_html($row->domain);
-        $server = strtoupper($row->server ?? 'UK');
+    foreach ($all_domains as $domain_data) {
+        $dominio = esc_html($domain_data['domain']);
+        $server = $domain_data['server'];
         $server_lower = strtolower($server);
-        $status = $row->status ?? 'Activo';
-        $startdate = $row->startdate;
-        $trees = (int)($row->trees_planted ?? 0);
-        $co2 = (float)($row->co2_evaded ?? 0);
-        $primary_domain = $row->primary_domain ?? $dominio;
-        $is_addon = ($status === 'Addon');
+        $status = $domain_data['status'];
+        $startdate = $domain_data['startdate'];
+
+        // Obtener datos de la base de datos
+        $existente = $wpdb->get_row($wpdb->prepare("SELECT * FROM $tabla WHERE domain = %s", $dominio));
+
+        $fecha_emision_calculada = date('Y-m-d', $startdate);
+        $validez_calculada = date('Y-m-d', strtotime("$fecha_emision_calculada +1 year"));
+
+        if ($existente) {
+            if ($existente->fecha_emision !== $fecha_emision_calculada || $existente->validez !== $validez_calculada) {
+                $wpdb->update($tabla, [
+                    'fecha_emision' => $fecha_emision_calculada,
+                    'validez' => $validez_calculada,
+                ], ['domain' => $dominio]);
+                $existente->fecha_emision = $fecha_emision_calculada;
+                $existente->validez = $validez_calculada;
+            }
+        }
+
+        $trees = $existente->trees_planted ?? 0;
+        $co2 = $existente->co2_evaded ?? 0;
 
         // Clases CSS para diferentes estados
         $status_class = '';
@@ -687,20 +756,35 @@ function mostrar_todos_los_dominios_unificados() {
         echo '<tr class="' . $row_class . '" data-domain="' . esc_attr($dominio) . '" data-server="' . esc_attr($server_lower) . '" data-status="' . esc_attr($status) . '">';
         
         // Columna dominio
-        if ($is_addon && $primary_domain !== $dominio) {
-            echo "<td class='domain-cell addon-domain'>└─ $dominio <small>(addon de $primary_domain)</small></td>";
+        if ($status === 'Addon' && isset($domain_data['parent_domain'])) {
+            echo "<td class='domain-cell addon-domain'>└─ $dominio <small>(addon de {$domain_data['parent_domain']})</small></td>";
         } else {
             echo "<td class='domain-cell'><strong>$dominio</strong></td>";
         }
         
         echo "<td class='server-cell'><span class='server-badge server-{$server_lower}'>$server</span></td>";
         echo "<td class='status-cell'><span class='status-badge $status_class'>$status</span></td>";
-        echo '<td class="startdate-cell">' . ($startdate ? date('Y-m-d', $startdate) : 'N/A') . '</td>';
-        echo '<td class="registered-cell">' . esc_html($row->fecha_emision ?? '(No reg.)') . '</td>';
+        echo '<td class="startdate-cell">' . date('Y-m-d', $startdate) . '</td>';
+        echo '<td class="registered-cell">' . esc_html($existente->fecha_emision ?? '(No reg.)') . '</td>';
         echo "<td class='trees-cell'><input type='number' class='trees-input' data-domain='$dominio' data-server='$server_lower' value='$trees' min='0' /></td>";
         echo "<td class='co2-cell'><input type='number' class='co2-input' data-domain='$dominio' data-server='$server_lower' value='$co2' step='0.01' /></td>";
         echo "<td class='actions-cell'><button class='button button-small calculate-emissions' data-domain='$dominio' data-server='$server_lower'>Calcular</button></td>";
         echo '</tr>';
+
+        // Insertar en base de datos si no existe
+        if (!$existente) {
+            $wpdb->insert($tabla, [
+                'domain' => $dominio,
+                'startdate' => $startdate,
+                'fecha_emision' => $fecha_emision_calculada,
+                'validez' => $validez_calculada,
+                'status' => $status,
+                'trees_planted' => 0,
+                'co2_evaded' => 0,
+                'primary_domain' => $status === 'Addon' && isset($domain_data['parent_domain']) ? $domain_data['parent_domain'] : $dominio,
+                'is_primary' => $status !== 'Addon' ? 1 : 0
+            ]);
+        }
     }
 
     echo '</tbody></table>';
@@ -1014,191 +1098,4 @@ function mostrar_servidor_dominios($server, $server_name, $server_ip) {
     echo '</div>';
     echo '</div>'; // Fin domains-table-container
     echo '</div>'; // Fin server-section
-}
-
-/**
- * Página de Diagnóstico - Solo accesible por URL directa
- * URL: /wp-admin/admin.php?page=dominios-reseller-diagnostic
- */
-function dominios_reseller_diagnostic_page() {
-    global $wpdb;
-    
-    echo '<div class="wrap">';
-    echo '<h1>🔍 Diagnóstico - Dominios Reseller</h1>';
-    
-    // 1. Versión del plugin
-    echo '<div style="background:#fff; padding:20px; margin:20px 0; border-left:4px solid #2271b1;">';
-    echo '<h2>📌 Versión del Plugin</h2>';
-    if (defined('DOMINIOS_RESELLER_VERSION')) {
-        $version = DOMINIOS_RESELLER_VERSION;
-        echo '<p style="font-size:18px;"><strong>Versión actual:</strong> <span style="color:#2271b1; font-weight:bold;">' . $version . '</span></p>';
-        
-        if (version_compare($version, '1.2.0', '>=')) {
-            echo '<p style="color:green; font-weight:bold;">✅ Versión correcta (1.2.0+)</p>';
-        } else {
-            echo '<p style="color:red; font-weight:bold;">❌ Versión antigua (' . $version . ') - Necesitas actualizar</p>';
-        }
-    } else {
-        echo '<p style="color:red; font-weight:bold;">⚠️ Constante DOMINIOS_RESELLER_VERSION no definida (versión MUY antigua)</p>';
-        echo '<p>Sube el nuevo archivo dominios-reseller.php</p>';
-    }
-    echo '</div>';
-    
-    // 2. Estructura de la Base de Datos
-    echo '<div style="background:#fff; padding:20px; margin:20px 0; border-left:4px solid #2271b1;">';
-    echo '<h2>💾 Estructura de Base de Datos</h2>';
-    $tabla = $wpdb->prefix . 'dominios_reseller';
-    
-    $columns = $wpdb->get_results("SHOW COLUMNS FROM $tabla");
-    if ($columns) {
-        echo '<table class="widefat" style="margin-top:10px;"><thead><tr><th>Campo</th><th>Tipo</th><th>Null</th><th>Key</th></tr></thead><tbody>';
-        $has_server = false;
-        foreach ($columns as $col) {
-            if ($col->Field === 'server') $has_server = true;
-            $highlight = ($col->Field === 'server') ? ' style="background:#c6f6d5; font-weight:bold;"' : '';
-            echo "<tr$highlight>";
-            echo '<td>' . esc_html($col->Field) . '</td>';
-            echo '<td>' . esc_html($col->Type) . '</td>';
-            echo '<td>' . esc_html($col->Null) . '</td>';
-            echo '<td>' . esc_html($col->Key) . '</td>';
-            echo '</tr>';
-        }
-        echo '</tbody></table>';
-        
-        if ($has_server) {
-            echo '<p style="color:green; font-weight:bold; font-size:16px;">✅ Campo <code>server</code> existe correctamente</p>';
-        } else {
-            echo '<p style="color:red; font-weight:bold; font-size:16px;">❌ Campo <code>server</code> NO existe</p>';
-            echo '<p><strong>SOLUCIÓN:</strong> Ve a Plugins → Desactivar "Dominios Reseller" → Activar de nuevo</p>';
-        }
-    }
-    echo '</div>';
-    
-    // 3. Contenido de la tabla
-    echo '<div style="background:#fff; padding:20px; margin:20px 0; border-left:4px solid #2271b1;">';
-    echo '<h2>📊 Datos en la Tabla</h2>';
-    $total = $wpdb->get_var("SELECT COUNT(*) FROM $tabla");
-    echo '<p style="font-size:16px;"><strong>Total de registros:</strong> ' . $total . '</p>';
-    
-    if (isset($has_server) && $has_server) {
-        $uk_count = $wpdb->get_var("SELECT COUNT(*) FROM $tabla WHERE server = 'uk'");
-        $usa_count = $wpdb->get_var("SELECT COUNT(*) FROM $tabla WHERE server = 'usa'");
-        echo '<p style="font-size:16px;">🇬🇧 UK: <strong>' . $uk_count . '</strong> dominios | 🇺🇸 USA: <strong>' . $usa_count . '</strong> dominios</p>';
-        
-        // Mostrar algunos dominios de ejemplo
-        $examples = $wpdb->get_results("SELECT domain, server, status FROM $tabla LIMIT 5");
-        if ($examples) {
-            echo '<p><strong>Ejemplos de dominios:</strong></p>';
-            echo '<ul>';
-            foreach ($examples as $ex) {
-                $flag = strtolower($ex->server) === 'usa' ? '🇺🇸' : '🇬🇧';
-                echo '<li>' . $flag . ' ' . esc_html($ex->domain) . ' (' . esc_html($ex->status) . ')</li>';
-            }
-            echo '</ul>';
-        }
-    }
-    echo '</div>';
-    
-    // 4. Funciones críticas
-    echo '<div style="background:#fff; padding:20px; margin:20px 0; border-left:4px solid #2271b1;">';
-    echo '<h2>⚙️ Funciones Críticas</h2>';
-    $functions = [
-        'dominios_reseller_sync_from_whm' => 'Sincronización WHM (v1.2.0+)',
-        'obtener_cuentas_whm' => 'Obtener cuentas WHM',
-        'obtener_datos_dominio_actual' => 'Datos de dominio para shortcode'
-    ];
-    
-    echo '<ul style="list-style:none; padding:0;">';
-    foreach ($functions as $func => $desc) {
-        if (function_exists($func)) {
-            echo '<li style="color:green; font-size:16px; padding:5px 0;">✅ <code>' . esc_html($func) . '</code> - ' . esc_html($desc) . '</li>';
-        } else {
-            echo '<li style="color:red; font-size:16px; padding:5px 0;">❌ <code>' . esc_html($func) . '</code> - ' . esc_html($desc) . ' <strong>(FALTA)</strong></li>';
-        }
-    }
-    echo '</ul>';
-    echo '</div>';
-    
-    // 5. Archivos modificados recientemente
-    echo '<div style="background:#fff; padding:20px; margin:20px 0; border-left:4px solid #2271b1;">';
-    echo '<h2>📁 Archivos del Plugin</h2>';
-    $plugin_dir = plugin_dir_path(__FILE__);
-    $files = [
-        'dominios-reseller.php' => 'Archivo principal',
-        'includes/shortcodes.php' => 'Shortcodes',
-        'includes/whm-functions.php' => 'Funciones WHM',
-        'includes/ajax-handlers.php' => 'Handlers AJAX'
-    ];
-    
-    echo '<table class="widefat"><thead><tr><th>Archivo</th><th>Estado</th><th>Última modificación</th><th>Tamaño</th></tr></thead><tbody>';
-    foreach ($files as $file => $desc) {
-        $path = $plugin_dir . $file;
-        if (file_exists($path)) {
-            $mtime = filemtime($path);
-            $date = date('Y-m-d H:i:s', $mtime);
-            $size = round(filesize($path) / 1024, 2) . ' KB';
-            
-            // Resaltar si es muy antiguo (más de 7 días)
-            $is_old = (time() - $mtime) > (7 * 24 * 60 * 60);
-            $row_style = $is_old ? ' style="background:#fff3cd;"' : '';
-            
-            echo '<tr' . $row_style . '>';
-            echo '<td><code>' . esc_html($file) . '</code><br><small>' . esc_html($desc) . '</small></td>';
-            echo '<td style="color:green;">✅ Existe</td>';
-            echo '<td>' . $date . ($is_old ? ' <span style="color:#856404;">(⚠️ Más de 7 días)</span>' : '') . '</td>';
-            echo '<td>' . $size . '</td>';
-            echo '</tr>';
-        } else {
-            echo '<tr>';
-            echo '<td><code>' . esc_html($file) . '</code></td>';
-            echo '<td style="color:red;">❌ No existe</td>';
-            echo '<td colspan="2">-</td>';
-            echo '</tr>';
-        }
-    }
-    echo '</tbody></table>';
-    echo '</div>';
-    
-    // 6. Recomendaciones finales
-    echo '<div style="background:#fff; padding:20px; margin:20px 0; border-left:4px solid #00a32a;">';
-    echo '<h2>💡 Recomendaciones</h2>';
-    
-    $all_ok = true;
-    if (!defined('DOMINIOS_RESELLER_VERSION') || version_compare(DOMINIOS_RESELLER_VERSION, '1.2.0', '<')) {
-        $all_ok = false;
-        echo '<p style="color:red; font-weight:bold;">❌ Versión antigua del plugin</p>';
-    }
-    if (!isset($has_server) || !$has_server) {
-        $all_ok = false;
-        echo '<p style="color:red; font-weight:bold;">❌ Base de datos no actualizada (falta campo server)</p>';
-    }
-    if (!function_exists('dominios_reseller_sync_from_whm')) {
-        $all_ok = false;
-        echo '<p style="color:red; font-weight:bold;">❌ Función de sincronización no existe</p>';
-    }
-    
-    if (!$all_ok) {
-        echo '<div style="background:#f8d7da; padding:15px; border:1px solid #f5c6cb; border-radius:5px; margin-top:15px;">';
-        echo '<h3 style="margin-top:0; color:#721c24;">⚠️ ACCIÓN REQUERIDA:</h3>';
-        echo '<ol style="line-height:1.8;">';
-        echo '<li><strong>Sube los nuevos archivos del plugin vía FTP</strong> (sobrescribe los existentes)</li>';
-        echo '<li>Ve a <strong>Plugins → Desactivar "Dominios Reseller"</strong></li>';
-        echo '<li>Ve a <strong>Plugins → Activar "Dominios Reseller"</strong></li>';
-        echo '<li>Vuelve a esta página para verificar que todo esté en verde ✅</li>';
-        echo '</ol>';
-        echo '</div>';
-    } else {
-        echo '<div style="background:#d4edda; padding:15px; border:1px solid #c3e6cb; border-radius:5px;">';
-        echo '<h3 style="margin-top:0; color:#155724;">✅ TODO CORRECTO</h3>';
-        echo '<p style="margin:0;">El plugin está actualizado y funcionando correctamente. Puedes usar:</p>';
-        echo '<ul style="line-height:1.8;">';
-        echo '<li>📊 Admin: <a href="' . admin_url('admin.php?page=dominios-reseller') . '">Ver dominios</a></li>';
-        echo '<li>🔄 Sincronizar datos desde WHM manualmente si es necesario</li>';
-        echo '<li>📄 Shortcode: <code>[mostrar_dominio]</code> en páginas públicas</li>';
-        echo '</ul>';
-        echo '</div>';
-    }
-    echo '</div>';
-    
-    echo '</div>'; // Fin wrap
 }
