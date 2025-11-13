@@ -1,5 +1,37 @@
 # Changelog - Sello Replanta
 
+## [2.0.4] - 2025-11-10 🔄 VERIFICACIÓN MEJORADA
+
+### 🎯 PROBLEMA RESUELTO: "El dominio no está en replanta"
+- **CORREGIDO**: Verificación mejorada con reintentos automáticos
+- **AÑADIDO**: Re-verificación cada hora si la primera verificación falla
+- **AÑADIDO**: Botón "🔄 Re-verificar ahora" en página de configuración
+- **AÑADIDO**: Interfaz mejorada mostrando estado actual del dominio
+
+### 🛠️ MEJORAS EN VERIFICACIÓN API
+- **MEJORADO**: Timeout aumentado a 15 segundos para conexiones lentas
+- **MEJORADO**: Validación de código HTTP antes de procesar respuesta
+- **MEJORADO**: Validación de JSON antes de procesar datos
+- **AÑADIDO**: Logging detallado con prefijo [Sello Replanta]
+- **AÑADIDO**: Timestamp de última verificación fallida
+
+### 📊 NUEVA PÁGINA DE CONFIGURACIÓN
+- **AÑADIDO**: Panel visual mostrando estado del dominio actual
+- **AÑADIDO**: Indicador de éxito/error con iconos
+- **AÑADIDO**: Información sobre última verificación fallida
+- **AÑADIDO**: Posibles causas si el dominio no está en Replanta
+- **AÑADIDO**: Botón de re-verificación manual con nonce de seguridad
+
+### 🔐 SEGURIDAD Y ESTABILIDAD
+- **MEJORADO**: Manejo robusto de errores de conexión
+- **MEJORADO**: Limpieza automática de flags de error tras verificación exitosa
+- **AÑADIDO**: Protección CSRF con wp_nonce_field en formularios
+
+### 🐛 CORRECCIONES
+- **FIXED**: Plugin ya no cachea indefinidamente verificaciones fallidas
+- **FIXED**: Verificación automática se reintenta si falla por conexión temporal
+- **FIXED**: Logs duplicados eliminados
+
 ## [2.0.3] - 2025-11-03 🧹 CLEAN & OPTIMIZED
 
 ### ✨ MEJORAS DE CÓDIGO

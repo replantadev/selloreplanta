@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Sello Replanta PRO
  * Description: Sello de carbono negativo inteligente que se adapta a cualquier page builder (Elementor, Divi, etc.). Versión PRO con detección avanzada.
- * Version: 2.0.3
+ * Version: 2.0.4
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 
 define('SR_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('SR_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('SR_VERSION', '2.0.3');
+define('SR_VERSION', '2.0.4');
 
 // Detectar page builders activos
 add_action('init', 'sello_replanta_detect_page_builders');
@@ -81,8 +81,25 @@ function sello_replanta_options_page()
 {
     $domain = wp_parse_url(home_url(), PHP_URL_HOST);
     $is_hosted = get_option('sello_replanta_is_hosted', null);
+    $last_check_failed = get_option('sello_replanta_last_check_failed', false);
+    
+    // Botón de re-verificación manual
+    if (isset($_POST['reverificar_dominio']) && check_admin_referer('sello_replanta_reverificar')) {
+        // Forzar nueva verificación
+        $is_hosted = verificar_dominio_replanta($domain);
+        update_option('sello_replanta_is_hosted', $is_hosted);
+        
+        echo '<div class="notice notice-success"><p>✅ Verificación completada</p></div>';
+    }
 
+    // Verificación automática inicial
     if (is_null($is_hosted)) {
+        $is_hosted = verificar_dominio_replanta($domain);
+        update_option('sello_replanta_is_hosted', $is_hosted);
+    }
+    
+    // Si la última verificación falló hace más de 1 hora, reintentar automáticamente
+    if ($last_check_failed && (time() - $last_check_failed) > 3600) {
         $is_hosted = verificar_dominio_replanta($domain);
         update_option('sello_replanta_is_hosted', $is_hosted);
     }
@@ -90,8 +107,48 @@ function sello_replanta_options_page()
 ?>
     <div class="wrap">
         <h1>Sello Replanta</h1>
+        
+        <div class="card" style="max-width: 800px; margin-bottom: 20px;">
+            <h2>🌍 Estado del Dominio</h2>
+            <p><strong>Dominio actual:</strong> <code><?php echo esc_html($domain); ?></code></p>
+            
+            <?php if ($is_hosted): ?>
+                <div class="notice notice-success inline" style="margin: 10px 0;">
+                    <p>✅ <strong>El dominio está alojado en Replanta.</strong></p>
+                    <p>El sello ecológico se mostrará correctamente en tu web.</p>
+                </div>
+            <?php else: ?>
+                <div class="notice notice-error inline" style="margin: 10px 0;">
+                    <p>❌ <strong>El dominio no está alojado en Replanta.</strong></p>
+                    <p>El sello NO se mostrará en tu web.</p>
+                </div>
+                
+                <?php if ($last_check_failed): ?>
+                    <div class="notice notice-warning inline" style="margin: 10px 0;">
+                        <p>⚠️ <strong>Última verificación falló hace <?php echo human_time_diff($last_check_failed); ?></strong></p>
+                        <p>Es posible que haya un problema temporal de conexión con replanta.net</p>
+                    </div>
+                <?php endif; ?>
+                
+                <div class="notice notice-info inline" style="margin: 10px 0;">
+                    <p><strong>Posibles causas:</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>El dominio no está registrado en replanta.net</li>
+                        <li>El dominio está suspendido</li>
+                        <li>Problema temporal de conexión</li>
+                    </ul>
+                </div>
+            <?php endif; ?>
+            
+            <form method="post" style="margin-top: 15px;">
+                <?php wp_nonce_field('sello_replanta_reverificar'); ?>
+                <input type="hidden" name="reverificar_dominio" value="1">
+                <button type="submit" class="button button-secondary">🔄 Re-verificar ahora</button>
+                <p class="description">Haz clic aquí si acabas de contratar hosting en Replanta o si crees que hay un error.</p>
+            </form>
+        </div>
+        
         <?php if ($is_hosted): ?>
-            <p>El dominio está alojado en Replanta.</p>
             <form method="post" action="options.php">
                 <?php
                 settings_fields('sello_replanta_options_group');
@@ -99,8 +156,6 @@ function sello_replanta_options_page()
                 submit_button();
                 ?>
             </form>
-        <?php else: ?>
-            <p>El dominio no está alojado en Replanta.</p>
         <?php endif; ?>
     </div>
 <?php
@@ -278,7 +333,7 @@ function sello_replanta_options_validate($input)
 function verificar_dominio_replanta($domain)
 {
     if (defined('WP_DEBUG') && WP_DEBUG) {
-        error_log('Verificando dominio: ' . $domain);
+        error_log('[Sello Replanta] Verificando dominio: ' . $domain);
     }
 
     $url = 'https://replanta.net/wp-json/replanta/v1/check_domain';
@@ -286,32 +341,54 @@ function verificar_dominio_replanta($domain)
         'body' => json_encode(array('domain' => $domain)),
         'headers' => array(
             'Content-Type' => 'application/json'
-        )
+        ),
+        'timeout' => 15
     ));
 
     if (is_wp_error($response)) {
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('Error en la solicitud: ' . $response->get_error_message());
+            error_log('[Sello Replanta] Error en la solicitud: ' . $response->get_error_message());
         }
+        // Si hay error de conexión, guardar timestamp para reintentar más tarde
+        update_option('sello_replanta_last_check_failed', time());
+        return false;
+    }
+
+    $http_code = wp_remote_retrieve_response_code($response);
+    if ($http_code !== 200) {
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('[Sello Replanta] HTTP Error: ' . $http_code);
+        }
+        update_option('sello_replanta_last_check_failed', time());
         return false;
     }
 
     $body = wp_remote_retrieve_body($response);
     $data = json_decode($body, true);
 
+    if (!is_array($data)) {
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('[Sello Replanta] Respuesta inválida (no es JSON válido)');
+        }
+        update_option('sello_replanta_last_check_failed', time());
+        return false;
+    }
+
     $is_hosted = isset($data['hosted']) && $data['hosted'] === true;
 
     if (defined('WP_DEBUG') && WP_DEBUG) {
         if ($is_hosted) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Dominio alojado en Replanta: ' . $domain);
+            error_log('[Sello Replanta] ✅ Dominio alojado en Replanta: ' . $domain);
+            if (isset($data['server'])) {
+                error_log('[Sello Replanta] Servidor: ' . $data['server']);
             }
         } else {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Dominio no alojado en Replanta: ' . $domain);
-            }
+            error_log('[Sello Replanta] ❌ Dominio no alojado en Replanta: ' . $domain);
         }
     }
+
+    // Limpiar flag de error si la verificación fue exitosa
+    delete_option('sello_replanta_last_check_failed');
 
     return $is_hosted;
 }
