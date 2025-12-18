@@ -73,8 +73,6 @@
             // Obtener configuración del contenedor
             const position = container.dataset.position || 'auto';
             const builders = (container.dataset.builders || '').split(',').filter(Boolean);
-            const zindexValue = container.dataset.zindex || '9999';
-            const margin = container.dataset.margin || '0';
 
             // Detectar conflictos con chats y otros plugins
             this.detectAndFixConflicts(container);
@@ -113,10 +111,10 @@
             }
 
             if (chatDetected) {
-                // Si el z-index es automático y hay chats, bajarlo
-                const zindexClass = container.className.match(/sello-zindex-(\w+)/);
-                if (zindexClass && zindexClass[1] === 'auto') {
-                    container.style.zIndex = '99';
+                // Si el z-index configurado es alto (> 1000) y hay chats, reducirlo automáticamente
+                const currentZindex = parseInt(container.dataset.zindex || '9999');
+                if (currentZindex > 1000) {
+                    container.style.zIndex = Math.min(currentZindex, 999);
                 }
 
                 // Añadir margen adicional si no está configurado

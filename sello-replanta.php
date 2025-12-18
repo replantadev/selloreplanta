@@ -1,9 +1,8 @@
 <?php
-
 /**
  * Plugin Name: Sello Replanta PRO
  * Description: Sello de carbono negativo inteligente que se adapta a cualquier page builder (Elementor, Divi, etc.). Versión PRO con detección avanzada.
- * Version: 2.0.4
+ * Version: 2.0.5
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -20,7 +19,7 @@ if (!defined('ABSPATH')) {
 
 define('SR_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('SR_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('SR_VERSION', '2.0.4');
+define('SR_VERSION', '2.0.5');
 
 // Detectar page builders activos
 add_action('init', 'sello_replanta_detect_page_builders');
@@ -297,7 +296,7 @@ function sello_replanta_setting_opacity()
 function sello_replanta_setting_zindex()
 {
     $options = get_option('sello_replanta_options');
-    $zindex = isset($options['zindex']) ? $options['zindex'] : '9999';
+    $zindex = isset($options['zindex']) ? $options['zindex'] : 9999;
     echo "<input type='number' id='sello_replanta_zindex' name='sello_replanta_options[zindex]' value='" . esc_attr($zindex) . "' min='1' max='999999' step='1' style='width: 100px;' />";
     echo "<p class='description'>Controla el orden de apilamiento (z-index). Valores comunes: 100 (debajo de chats), 1000 (medio), 9999 (alto), 99999 (muy alto).</p>";
 }
@@ -407,7 +406,7 @@ function sello_replanta_display_badge()
     $position = isset($options['position']) ? $options['position'] : 'auto';
     $size = isset($options['size']) ? $options['size'] : 'normal';
     $opacity = isset($options['opacity']) ? $options['opacity'] : 1.0;
-    $zindex = isset($options['zindex']) ? $options['zindex'] : 'auto';
+    $zindex = isset($options['zindex']) ? $options['zindex'] : 9999;
     $margin = isset($options['margin']) ? $options['margin'] : 0;
 
     // Configurar tamaños según la opción
@@ -426,24 +425,7 @@ function sello_replanta_display_badge()
     $page_builders = get_option('sello_replanta_page_builders', array());
     
     // Determinar z-index según configuración
-    $zindex_value = 9999; // Por defecto
-    switch ($zindex) {
-        case 'low':
-            $zindex_value = 100;
-            break;
-        case 'medium':
-            $zindex_value = 1000;
-            break;
-        case 'high':
-            $zindex_value = 9999;
-            break;
-        case 'higher':
-            $zindex_value = 99999;
-            break;
-        default: // 'auto'
-            $zindex_value = 9999;
-            break;
-    }
+    $zindex_value = intval($zindex) > 0 ? intval($zindex) : 9999;
 
     // Determinar la estrategia de posicionamiento
     $positioning_class = 'sello-position-auto';
@@ -472,7 +454,7 @@ function sello_replanta_display_badge()
     $style_attr = !empty($inline_styles) ? ' style="' . implode('; ', $inline_styles) . ';"' : '';
 
     // Generar el HTML del sello con configuración PRO
-    echo '<div id="sello-replanta-container" class="' . esc_attr($positioning_class) . ' sello-size-' . esc_attr($size) . '"' . $style_attr . ' data-position="' . esc_attr($position) . '" data-builders="' . esc_attr(implode(',', $page_builders)) . '">
+    echo '<div id="sello-replanta-container" class="' . esc_attr($positioning_class) . ' sello-size-' . esc_attr($size) . '"' . $style_attr . ' data-position="' . esc_attr($position) . '" data-builders="' . esc_attr(implode(',', $page_builders)) . '" data-zindex="' . esc_attr($zindex_value) . '" data-margin="' . esc_attr($margin) . '">
         <div class="sello-replanta-footer">
             <div class="sello-replanta-wrapper" aria-label="Certificado hosting ecológico">
                 <a href="https://replanta.net/web-hosting-ecologico/?utm_source=' . esc_attr($domain) . '&utm_medium=badge&utm_campaign=seal&domain=' . esc_attr($domain) . '" 

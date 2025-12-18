@@ -1,5 +1,28 @@
 # Changelog - Sello Replanta
 
+## [2.0.5] - 2025-12-18 🔧 Z-INDEX FIX & OPTIMIZATION
+
+### 🚨 PROBLEMA RESUELTO: Z-Index no se aplicaba correctamente
+- **CORREGIDO**: Z-Index ahora se aplica directamente desde la configuración numérica del admin
+- **ELIMINADO**: Switch statement defectuoso que trataba números como strings
+- **MEJORADO**: Eliminada regla CSS `z-index: 9999 !important` que sobreescribía estilos inline
+- **ACTUALIZADO**: JavaScript ahora respeta el z-index configurado en lugar de clases CSS
+
+### 🛠️ MEJORAS EN JAVASCRIPT
+- **MEJORADO**: Detección de conflictos con chats ahora usa `data-zindex` en lugar de clases CSS
+- **OPTIMIZADO**: Reducción automática de z-index solo cuando es mayor a 1000 y hay chats detectados
+- **AÑADIDO**: Atributo `data-zindex` al contenedor para comunicación PHP-JS
+
+### 🔧 VALIDACIÓN Y GUARDADO
+- **VERIFICADO**: Validación de z-index funciona correctamente (1-999999)
+- **CONSISTENTE**: Valores por defecto ahora son números en lugar de strings
+- **ESTABLE**: Eliminadas inconsistencias entre admin y front-end
+
+### 📊 COMPATIBILIDAD
+- **MANTENIDO**: Compatibilidad con todos los page builders (Elementor, Divi, Beaver, etc.)
+- **MANTENIDO**: Detección automática de chats y ajuste de z-index/margen
+- **MANTENIDO**: Todas las demás funcionalidades sin cambios
+
 ## [2.0.4] - 2025-11-10 🔄 VERIFICACIÓN MEJORADA
 
 ### 🎯 PROBLEMA RESUELTO: "El dominio no está en replanta"
