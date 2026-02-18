@@ -1,8 +1,8 @@
 # Changelog - Sello Replanta
 
-## [2.0.4] - 2026-02-18 🔧 Z-INDEX FIX
+## [2.0.6] - 2026-02-18 🔧 Z-INDEX FIX COMPLETO
 
-### 🚨 BUG CORREGIDO: Z-Index del admin no se aplicaba en el front
+### 🚨 BUG CORREGIDO: Z-Index del admin no se aplicaba en el front (fix definitivo, sustituye v2.0.5 incompleto)
 - **CORREGIDO**: El valor numérico de z-index configurado en admin se ignoraba. Un `switch` en PHP trataba el valor como string ('low','medium','high') cuando la validación lo guardaba como entero. Siempre caía en default → 9999.
 - **CORREGIDO**: El CSS tenía `z-index: 9999 !important` hardcodeado en `#sello-replanta-container`, que machacaba cualquier inline style. Eliminado el `!important`.
 - **CORREGIDO**: El JS (`detectAndFixConflicts`) sobrescribía el z-index a 99 al detectar chats, sin respetar el valor del admin. Ahora solo baja a 99 si el usuario dejó el default (9999).
