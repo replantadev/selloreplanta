@@ -73,7 +73,7 @@
             // Obtener configuración del contenedor
             const position = container.dataset.position || 'auto';
             const builders = (container.dataset.builders || '').split(',').filter(Boolean);
-            const zindexValue = container.dataset.zindex || '9999';
+            const zindexValue = parseInt(container.dataset.zindex, 10) || 9999;
             const margin = container.dataset.margin || '0';
 
             // Detectar conflictos con chats y otros plugins
@@ -113,11 +113,12 @@
             }
 
             if (chatDetected) {
-                // Si el z-index es automático y hay chats, bajarlo
-                const zindexClass = container.className.match(/sello-zindex-(\w+)/);
-                if (zindexClass && zindexClass[1] === 'auto') {
+                // Respect the admin z-index — only auto-lower if user left the default 9999
+                const adminZindex = parseInt(container.dataset.zindex, 10) || 9999;
+                if (adminZindex === 9999) {
                     container.style.zIndex = '99';
                 }
+                // else: keep the z-index the admin explicitly chose
 
                 // Añadir margen adicional si no está configurado
                 const currentMargin = parseInt(container.dataset.margin || '0');

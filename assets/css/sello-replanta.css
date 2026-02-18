@@ -4,7 +4,7 @@
 #sello-replanta-container {
     width: 100% !important;
     clear: both !important;
-    z-index: 9999 !important;
+    /* z-index is set via inline style from admin setting */
     position: relative !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -73,25 +73,8 @@
 }
 
 /* === Z-INDEX CONTROL === */
-.sello-zindex-auto {
-    z-index: 9999 !important;
-}
-
-.sello-zindex-low {
-    z-index: 100 !important;
-}
-
-.sello-zindex-medium {
-    z-index: 1000 !important;
-}
-
-.sello-zindex-high {
-    z-index: 9999 !important;
-}
-
-.sello-zindex-higher {
-    z-index: 99999 !important;
-}
+/* z-index is now driven entirely by the inline style from admin.
+   No !important overrides here — the user's value is king. */
 
 /* === COMPATIBILIDAD CON CHATS === */
 

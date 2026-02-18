@@ -3,7 +3,7 @@ Contributors: replantadev
 Tags: footer, sello, ecológico, carbono negativo
 Requires at least: 5.0
 Tested up to: 6.8.1
-Stable tag: 2.0.3
+Stable tag: 2.0.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,11 @@ Este plugin añade un sello de carbono negativo en el footer del sitio web si el
 El plugin detectará automáticamente el color de fondo del último elemento visible del footer.
 
 == Changelog ==
+
+= 2.0.4 =
+* Corregido: el z-index configurado en admin no se aplicaba en el front (siempre usaba 9999).
+* Eliminado z-index !important hardcodeado en CSS.
+* JS respeta ahora el valor del admin en vez de sobrescribirlo.
 
 = 1.0.6 =
 * Añadida opción para configurar un color de fondo personalizado.
