@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Sello Replanta PRO
  * Description: Sello de carbono negativo inteligente que se adapta a cualquier page builder (Elementor, Divi, etc.). Versión PRO con detección avanzada.
- * Version: 2.0.6
+ * Version: 2.0.7
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 
 define('SR_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('SR_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('SR_VERSION', '2.0.6');
+define('SR_VERSION', '2.0.7');
 
 // Detectar page builders activos
 add_action('init', 'sello_replanta_detect_page_builders');
@@ -58,15 +58,15 @@ function sello_replanta_detect_page_builders() {
 
 if (file_exists(SR_PLUGIN_PATH . 'vendor/autoload.php')) {
     require_once SR_PLUGIN_PATH . 'vendor/autoload.php';
+    if (class_exists('YahnisElsts\PluginUpdateChecker\v5\PucFactory')) {
+        $updateChecker = YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+            'https://github.com/replantadev/selloreplanta/',
+            __FILE__,
+            'sello-replanta'
+        );
+        $updateChecker->setBranch('main');
+    }
 }
-
-use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
-
-$updateChecker = PucFactory::buildUpdateChecker(
-    'https://github.com/replantadev/selloreplanta/',
-    __FILE__,
-    'sello-replanta'
-);
 
 // Añadir menú en el administrador
 add_action('admin_menu', 'sello_replanta_menu');

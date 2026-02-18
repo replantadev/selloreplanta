@@ -1,5 +1,14 @@
 # Changelog - Sello Replanta
 
+## [2.0.7] - 2026-02-18 🔧 FIX FATAL ERROR: PUC + AUTO-UPDATE
+
+### 🚨 BUG CORREGIDO: Fatal error "Class PucFactory not found"
+- **CORREGIDO**: `vendor/` estaba excluido por `.gitignore` → la librería PUC no se desplegaba
+- **CORREGIDO**: El `use` statement y `PucFactory::buildUpdateChecker()` estaban fuera del `if (file_exists(...))` → fatal error si faltaba vendor
+- **CORREGIDO**: PUC buscaba rama `master` (default) pero el repo usa `main` → 403 en API
+- **AÑADIDO**: `$updateChecker->setBranch('main')` para apuntar a la rama correcta
+- **AÑADIDO**: `class_exists()` check para evitar fatal error si PUC no se carga
+
 ## [2.0.6] - 2026-02-18 🔧 Z-INDEX FIX COMPLETO
 
 ### 🚨 BUG CORREGIDO: Z-Index del admin no se aplicaba en el front (fix definitivo, sustituye v2.0.5 incompleto)
