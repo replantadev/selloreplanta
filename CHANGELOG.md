@@ -1,6 +1,12 @@
 # Changelog - Sello Replanta
 
-## [2.0.7] - 2026-02-18 🔧 FIX FATAL ERROR: PUC + AUTO-UPDATE
+## [2.0.8] - 2026-03-04 - Plugin Icon
+
+### Anadido
+- **NUEVO**: Icono del plugin visible en la pantalla de actualizaciones de WordPress
+- Usa el icono oficial de Replanta desde CDN
+
+## [2.0.7] - 2026-02-18 - FIX FATAL ERROR: PUC + AUTO-UPDATE
 
 ### 🚨 BUG CORREGIDO: Fatal error "Class PucFactory not found"
 - **CORREGIDO**: `vendor/` estaba excluido por `.gitignore` → la librería PUC no se desplegaba

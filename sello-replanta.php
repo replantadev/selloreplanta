@@ -2,8 +2,8 @@
 
 /**
  * Plugin Name: Sello Replanta PRO
- * Description: Sello de carbono negativo inteligente que se adapta a cualquier page builder (Elementor, Divi, etc.). Versión PRO con detección avanzada.
- * Version: 2.0.7
+ * Description: Sello de carbono negativo inteligente que se adapta a cualquier page builder (Elementor, Divi, etc.). Version PRO con deteccion avanzada.
+ * Version: 2.0.8
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 
 define('SR_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('SR_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('SR_VERSION', '2.0.7');
+define('SR_VERSION', '2.0.8');
 
 // Detectar page builders activos
 add_action('init', 'sello_replanta_detect_page_builders');
@@ -65,6 +65,16 @@ if (file_exists(SR_PLUGIN_PATH . 'vendor/autoload.php')) {
             'sello-replanta'
         );
         $updateChecker->setBranch('main');
+        
+        // Add plugin icons for update screen
+        $updateChecker->addResultFilter(function($pluginInfo) {
+            // Icon hosted on replanta.net
+            $pluginInfo->icons = array(
+                '1x'  => 'https://replanta.net/wp-content/uploads/2026/03/sello-rep.png',
+                '2x'  => 'https://replanta.net/wp-content/uploads/2026/03/sello-rep.png',
+            );
+            return $pluginInfo;
+        });
     }
 }
 
