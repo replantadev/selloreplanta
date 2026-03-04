@@ -1,5 +1,14 @@
 # Changelog - Sello Replanta
 
+## [2.0.9] - 2026-03-04 - Fix PucReadmeParser
+
+### Corregido
+- **CORREGIDO**: Fatal error "Class PucReadmeParser not found" al instalar el plugin
+- Incluidos archivos faltantes en `vendor/yahnis-elsts/plugin-update-checker/vendor/`:
+  - `PucReadmeParser.php`
+  - `Parsedown.php` 
+  - `ParsedownModern.php`
+
 ## [2.0.8] - 2026-03-04 - Plugin Icon
 
 ### Anadido
