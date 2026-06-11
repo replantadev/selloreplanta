@@ -1,5 +1,11 @@
 # Changelog - Sello Replanta
 
+## [2.0.10] - 2026-06-11 - Integración Huella Digital
+
+### Mejorado
+- **Schema.org**: la URL de certificación ahora apunta a `https://replanta.net/web-hosting-ecologico/?domain={dominio}`, la página Huella Digital con el hero personalizado (árboles plantados y CO₂ evitado del dominio)
+- La antigua URL `/certificacion?sitio=` no existía; el enlace del badge y el Schema.org ahora aterrizan en la misma página verificable
+
 ## [2.0.9] - 2026-03-04 - Fix PucReadmeParser
 
 ### Corregido

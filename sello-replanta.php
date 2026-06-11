@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Sello Replanta PRO
  * Description: Sello de carbono negativo inteligente que se adapta a cualquier page builder (Elementor, Divi, etc.). Version PRO con deteccion avanzada.
- * Version: 2.0.9
+ * Version: 2.0.10
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 
 define('SR_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('SR_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('SR_VERSION', '2.0.9');
+define('SR_VERSION', '2.0.10');
 
 // Detectar page builders activos
 add_action('init', 'sello_replanta_detect_page_builders');
@@ -418,7 +418,7 @@ function sello_replanta_display_badge()
         "name" => "Certificación de Hosting Ecológico",
         "award" => "Sello Replanta",
         "description" => "Distintivo ecológico otorgado por Replanta a sitios web alojados en servidores con huella de carbono negativa.",
-        "url" => "https://replanta.net/certificacion?sitio=" . $domain,
+        "url" => "https://replanta.net/web-hosting-ecologico/?domain=" . $domain,
         "image" => $image_url,
         "datePublished" => $issue_date,
         "author" => [
