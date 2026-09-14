@@ -1,36 +1,17 @@
-# Sello Replanta
+# Sello Replanta 2.1.0
 
-**Sello Replanta** es un plugin para WordPress diseñado para integrar funcionalidades específicas relacionadas con la sostenibilidad y el medio ambiente en tu sitio web.
+Identificador de alojamiento para WordPress. Muestra «Hosting: Replanta» y el plan registrado cuando la API confirma el dominio exacto. Enlaza a la información de infraestructura del dominio.
 
-## Características
+El identificador no es una certificación ambiental ni acredita neutralidad o balance negativo de carbono. Cedro, Sauce y Roble tienen información de infraestructura diferenciada en la página de destino.
 
-- Personalización del sello de sostenibilidad.
-- Integración sencilla con temas y otros plugins.
-- Opciones de configuración amigables para el usuario.
-- Compatible con las últimas versiones de WordPress.
+## Actualización
 
-## Instalación
+En WordPress, pulsa «Comprobar si hay actualizaciones» y actualiza a 2.1.0. Después vacía la caché de página. La distribución incluye las dependencias del actualizador de GitHub.
 
-1. Descarga el archivo del plugin.
-2. Ve a tu panel de administración de WordPress.
-3. Navega a `Plugins > Añadir nuevo > Subir plugin`.
-4. Selecciona el archivo descargado y haz clic en "Instalar ahora".
-5. Activa el plugin desde el menú de plugins.
+## Configuración
 
-## Uso
+Ajustes → Sello Replanta permite seleccionar la posición. Se conservan las preferencias existentes al actualizar. Si el dominio no está confirmado o falla la verificación, no se muestra el identificador.
 
-1. Configura el plugin desde el menú `Sello Replanta` en el panel de administración.
-2. Personaliza las opciones según tus necesidades.
-3. Agrega el sello a tu sitio web utilizando el shortcode proporcionado o mediante widgets.
+## Desarrollo
 
-## Soporte
-
-Si tienes preguntas o necesitas ayuda, por favor contacta con nosotros a través de [info@replanta.dev](mailto:info@replanta.dev).
-
-## Contribuciones
-
-¡Las contribuciones son bienvenidas! Si deseas colaborar, por favor abre un issue o envía un pull request en nuestro repositorio de GitHub.
-
-## Licencia
-
-Este plugin está licenciado bajo la [Licencia GPL v2 o posterior](https://www.gnu.org/licenses/gpl-2.0.html).
+Archivo principal: sello-replanta.php. Actualizaciones mediante Plugin Update Checker, repositorio replantadev/selloreplanta, rama main y releases de GitHub.

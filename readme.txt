@@ -1,42 +1,29 @@
 === Sello Replanta ===
 Contributors: replantadev
-Tags: footer, sello, ecologico, carbono negativo
+Tags: hosting, footer, replanta
 Requires at least: 5.0
-Tested up to: 6.8.1
-Stable tag: 2.0.10
+Requires PHP: 7.4
+Stable tag: 2.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Añade un sello de carbono negativo en el footer del sitio web si está alojado en Replanta.
+Identifica el alojamiento Replanta y el plan registrado mediante un enlace informativo.
 
 == Description ==
-
-Este plugin añade un sello de carbono negativo en el footer del sitio web si el dominio está alojado en Replanta. Puedes elegir entre un modo claro u oscuro para el sello y configurar un color de fondo personalizado.
+Muestra «Hosting: Replanta» y, cuando la API confirma el plan, Cedro, Sauce o Roble. El enlace dirige a la información de alojamiento del dominio. No es una certificación ambiental ni una declaración de neutralidad o balance negativo de carbono.
+La identificación requiere una respuesta válida de la API para el dominio exacto. Ante una respuesta no válida o un dominio no reconocido, no se muestra. Conserva las opciones de posición del plugin.
 
 == Installation ==
-
-1. Sube la carpeta `sello-replanta` al directorio `/wp-content/plugins/`.
-2. Activa el plugin a través del menú 'Plugins' en WordPress.
-3. Ve a Ajustes > Sello Replanta para configurar el plugin.
-
-== Frequently Asked Questions ==
-
-= ¿Qué pasa si no configuro un color de fondo? =
-El plugin detectará automáticamente el color de fondo del último elemento visible del footer.
+1. Instala y activa el plugin en WordPress.
+2. Configura la posición en Ajustes > Sello Replanta.
 
 == Changelog ==
-
-= 2.0.4 =
-* Corregido: el z-index configurado en admin no se aplicaba en el front (siempre usaba 9999).
-* Eliminado z-index !important hardcodeado en CSS.
-* JS respeta ahora el valor del admin en vez de sobrescribirlo.
-
-= 1.0.6 =
-* Añadida opción para configurar un color de fondo personalizado.
-* Mejorada la detección automática del color de fondo.
-* Cumplimiento de las buenas prácticas del repositorio de WordPress.
+= 2.1.0 =
+* Sustituye el sello ambiental por un identificador textual de alojamiento y plan.
+* Verifica dominio exacto y contrato de API versión 2, con caché limitada.
+* Retira los gráficos de carbono negativo y los datos estructurados de certificación.
+* Conserva las preferencias existentes de posición.
 
 == Upgrade Notice ==
-
-= 1.0.6 =
-Actualiza para obtener la nueva funcionalidad de configuración de color de fondo.
+= 2.1.0 =
+El distintivo pasa a identificar el alojamiento y el plan. Actualiza y vacía la caché de página para retirar la imagen anterior.
