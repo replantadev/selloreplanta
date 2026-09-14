@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Sello Replanta PRO
  * Description: Identificación del alojamiento Replanta y del plan registrado. Sin certificación ambiental propia.
- * Version: 2.1.0
+ * Version: 2.2.0
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -46,7 +46,7 @@ add_action('template_redirect', function () {
 
 define('SR_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('SR_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('SR_VERSION', '2.1.0');
+define('SR_VERSION', '2.2.0');
 
 // Detectar page builders activos
 add_action('init', 'sello_replanta_detect_page_builders');
@@ -313,7 +313,7 @@ function sello_replanta_options_validate($input)
 // Función para verificar si el dominio está alojado en Replanta
 function sello_replanta_verified_info() {
     $domain = strtolower((string)wp_parse_url(home_url(), PHP_URL_HOST));
-    $key='sr_info_v2_'.md5($domain);
+    $key='sr_info_v22_'.md5($domain);
     $cached=get_transient($key);
     if (is_array($cached)) return $cached;
     $r=wp_remote_post('https://replanta.net/wp-json/replanta/v1/check_domain',[
@@ -323,8 +323,8 @@ function sello_replanta_verified_info() {
     $d=!is_wp_error($r) && wp_remote_retrieve_response_code($r)===200 ? json_decode(wp_remote_retrieve_body($r),true) : null;
     $valid=is_array($d) && ($d['hosted']??false)===true && ($d['schema_version']??0)===2
         && strtolower((string)($d['domain']??''))===preg_replace('/^www\./','',$domain);
-    $info=['hosted'=>$valid,'plan'=>$valid && in_array($d['plan']??'', ['cedro','sauce','roble'],true)?$d['plan']:''];
-    set_transient($key,$info,$valid?HOUR_IN_SECONDS:5*MINUTE_IN_SECONDS);
+    $info=['hosted'=>$valid,'cloudflare'=>$valid && ($d['delivery']['provider']??null)==='cloudflare','plan'=>$valid && in_array($d['plan']??'', ['cedro','sauce','roble'],true)?$d['plan']:''];
+    set_transient($key,$info,$valid?15*MINUTE_IN_SECONDS:5*MINUTE_IN_SECONDS);
     return $info;
 }
 function verificar_dominio_replanta($domain) {
@@ -414,7 +414,10 @@ function sello_replanta_display_badge()
                    target="_blank" 
                    rel="noopener sponsored" 
                    class="replanta-seal-link">
-                    <span style="display:inline-block;padding:7px 10px;font:500 12px/1.4 system-ui,sans-serif;background:#fff;color:#1E2F23;border:1px solid #ddd;border-radius:4px;white-space:nowrap">Hosting: Replanta' . (sello_replanta_verified_info()['plan'] ? ' · ' . esc_html(ucfirst(sello_replanta_verified_info()['plan'])) : '') . '</span>
+                    <span class="sr-brand sr-brand--' . esc_attr($mode === 'dark' ? 'dark' : 'light') . '">
+                        <svg class="sr-brand__mark" width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect width="32" height="32" rx="9" fill="currentColor"/><path d="M10 23V10h7a4 4 0 0 1 0 8h-7m7 0 5 5" stroke="var(--sr-mark-ink)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="sr-brand__text"><span class="sr-brand__kicker">WEB HOSTING BY</span><span class="sr-brand__name">replanta<span class="sr-brand__arrow" aria-hidden="true">↗</span></span><span class="sr-brand__detail">' . esc_html(sello_replanta_verified_info()['cloudflare'] ? 'Hosting + Cloudflare' : (sello_replanta_verified_info()['plan'] === 'cedro' ? 'Servidor en Alemania' : (in_array(sello_replanta_verified_info()['plan'], ['sauce','roble'], true) ? 'Hosting con LiteSpeed' : 'Conoce tu alojamiento'))) . '</span></span>
+                    </span>
                 </a>
             </div>
         </div>

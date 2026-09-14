@@ -296,3 +296,8 @@ body:has([class*="floating"]) .sello-zindex-auto {
     font-family: inherit !important;
     line-height: 1 !important;
 }
+/* 2.2: branded service identification, with no environmental certification mark. */
+.replanta-seal-link .sr-brand{--sr-mark-ink:#f4f6ec;display:inline-flex;align-items:center;gap:11px;padding:13px 17px;border:1px solid #d4ddcf;border-radius:12px;color:#203e2d;background:#f8faf3;box-shadow:0 3px 12px #10261b0a;text-align:left;font-family:system-ui,-apple-system,sans-serif;line-height:1.2;box-sizing:border-box}
+.replanta-seal-link .sr-brand--dark{--sr-mark-ink:#193526;background:#172d22;color:#d5e6bb;border-color:#405a43}
+.sr-brand__mark{flex:none}.sr-brand__text{display:flex;flex-direction:column;gap:2px}.sr-brand__kicker{font-size:8px;letter-spacing:.17em;font-weight:650}.sr-brand__name{font-size:24px;letter-spacing:-1px;font-weight:750}.sr-brand__arrow{font-size:17px;margin-left:12px;font-weight:400}.sr-brand__detail{font-size:9px;letter-spacing:0;font-weight:500;opacity:.85;margin-top:3px}
+.sello-size-small .sr-brand{padding:9px 12px;gap:8px}.sello-size-small .sr-brand__name{font-size:20px}.sello-size-small .sr-brand__mark{width:27px;height:27px}.sello-size-large .sr-brand{padding:16px 21px}.sello-size-large .sr-brand__name{font-size:28px}.replanta-seal-link:focus-visible{outline:2px solid currentColor!important;outline-offset:5px!important}
