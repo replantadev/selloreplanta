@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Sello Replanta PRO
  * Description: Identificación del alojamiento Replanta y del plan registrado. Sin certificación ambiental propia.
- * Version: 2.2.0
+ * Version: 2.3.0
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL2
@@ -46,7 +46,7 @@ add_action('template_redirect', function () {
 
 define('SR_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('SR_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('SR_VERSION', '2.2.0');
+define('SR_VERSION', '2.3.0');
 
 // Detectar page builders activos
 add_action('init', 'sello_replanta_detect_page_builders');
@@ -406,6 +406,11 @@ function sello_replanta_display_badge()
         ], $badge_href);
     }
 
+    $plan = sello_replanta_verified_info()['plan'];
+    $minimal_content = in_array($plan, ['sauce','roble'], true)
+        ? '<svg class="sr-plant" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M138.54,149.46C106.62,96.25,149.18,43.05,239.63,48.37,245,138.82,191.75,181.38,138.54,149.46Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/><path d="M88.47,160.47c22.8-38-7.6-76-72.21-72.21C12.46,152.87,50.47,183.27,88.47,160.47Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/><line x1="56" y1="128" x2="120" y2="192" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/><path d="M200,88l-61.25,61.25A64,64,0,0,0,120,194.51V224" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/></svg>'
+        : '<span class="sr-minimal-text">' . esc_html($plan === 'cedro' ? preg_replace('/^www\./i', '', (string)$domain) . ' · Replanta' : 'Replanta') . '</span>';
+
     // Generar el HTML del sello con configuración PRO
     echo '<div id="sello-replanta-container" class="' . esc_attr($positioning_class) . ' sello-size-' . esc_attr($size) . '"' . $style_attr . $data_zindex . ' data-position="' . esc_attr($position) . '" data-builders="' . esc_attr(implode(',', $page_builders)) . '">
         <div class="sello-replanta-footer">
@@ -413,11 +418,8 @@ function sello_replanta_display_badge()
                 <a href="' . esc_url($badge_href) . '" 
                    target="_blank" 
                    rel="noopener sponsored" 
-                   class="replanta-seal-link">
-                    <span class="sr-brand sr-brand--' . esc_attr($mode === 'dark' ? 'dark' : 'light') . '">
-                        <svg class="sr-brand__mark" width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect width="32" height="32" rx="9" fill="currentColor"/><path d="M10 23V10h7a4 4 0 0 1 0 8h-7m7 0 5 5" stroke="var(--sr-mark-ink)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        <span class="sr-brand__text"><span class="sr-brand__kicker">WEB HOSTING BY</span><span class="sr-brand__name">replanta<span class="sr-brand__arrow" aria-hidden="true">↗</span></span><span class="sr-brand__detail">' . esc_html(sello_replanta_verified_info()['cloudflare'] ? 'Hosting + Cloudflare' : (sello_replanta_verified_info()['plan'] === 'cedro' ? 'Servidor en Alemania' : (in_array(sello_replanta_verified_info()['plan'], ['sauce','roble'], true) ? 'Hosting con LiteSpeed' : 'Conoce tu alojamiento'))) . '</span></span>
-                    </span>
+                   class="replanta-seal-link sr-minimal-link" aria-label="' . esc_attr('Alojamiento de ' . $domain . ' en Replanta') . '">
+                    ' . $minimal_content . '
                 </a>
             </div>
         </div>
