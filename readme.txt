@@ -3,20 +3,17 @@ Contributors: replantadev
 Tags: hosting, footer, replanta
 Requires at least: 5.0
 Requires PHP: 7.4
-Stable tag: 2.3.1
+Stable tag: 2.3.2
 License: GPLv2 or later
 
-Enlace mínimo a la información de alojamiento Replanta.
+Enlace al informe de alojamiento y programa de árboles de Replanta.
 
 == Description ==
-Sauce y Roble muestran únicamente el icono de planta. Cedro muestra «dominio.com · Replanta». El enlace conserva la consulta del dominio y sus preferencias de posición. La marca no afirma que se haya realizado una plantación.
+Sauce, Roble y Cedro muestran el icono plant-thin de 45 px y el texto «este sitio web replanta». El enlace conserva el dominio para consultar su informe en Replanta. Los planes desconocidos muestran la marca Replanta. El distintivo no es una certificación de neutralidad de carbono.
 
 == Changelog ==
+= 2.3.2 =
+* SVG de 45 px con «este sitio web replanta» debajo para los tres planes identificados.
+* Se conserva el color verde al pasar el cursor y el enlace al informe del dominio.
 = 2.3.1 =
-* Icono plant-thin para Sauce y Roble.
-* Texto mínimo de dominio y marca para Cedro.
-* Retirados recuadro, composición anterior y textos complementarios.
-
-== Upgrade Notice ==
-= 2.3.1 =
-Actualiza y vacía la caché de página para mostrar el diseño mínimo.
+* Tamaño y visibilidad del icono corregidos.
