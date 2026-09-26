@@ -8,7 +8,7 @@
 
  * Description: Identificación del alojamiento Replanta y del plan registrado. Sin certificación ambiental propia.
 
- * Version: 2.3.2
+ * Version: 2.3.3
 
  * Author: Replanta
 
@@ -94,7 +94,7 @@ define('SR_PLUGIN_PATH', plugin_dir_path(__FILE__));
 
 define('SR_PLUGIN_URL', plugin_dir_url(__FILE__));
 
-define('SR_VERSION', '2.3.2');
+define('SR_VERSION', '2.3.3');
 
 
 
@@ -816,9 +816,7 @@ function sello_replanta_display_badge()
 
     $plan = sello_replanta_verified_info()['plan'];
 
-    $minimal_content = in_array($plan, ['sauce','roble','cedro'], true)
-        ? '<svg width="45" height="45" class="sr-plant" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M138.54,149.46C106.62,96.25,149.18,43.05,239.63,48.37,245,138.82,191.75,181.38,138.54,149.46Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/><path d="M88.47,160.47c22.8-38-7.6-76-72.21-72.21C12.46,152.87,50.47,183.27,88.47,160.47Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/><line x1="56" y1="128" x2="120" y2="192" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/><path d="M200,88l-61.25,61.25A64,64,0,0,0,120,194.51V224" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/></svg><span class="sr-forest-caption">este sitio web replanta</span>'
-        : '<span class="sr-minimal-text">Replanta</span>';
+    $minimal_content = '<svg width="35" height="35" class="sr-plant" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M138.54,149.46C106.62,96.25,149.18,43.05,239.63,48.37,245,138.82,191.75,181.38,138.54,149.46Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/><path d="M88.47,160.47c22.8-38-7.6-76-72.21-72.21C12.46,152.87,50.47,183.27,88.47,160.47Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/><line x1="56" y1="128" x2="120" y2="192" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/><path d="M200,88l-61.25,61.25A64,64,0,0,0,120,194.51V224" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/></svg><span class="sr-forest-caption">Este sitio web replanta.</span>';
 
 
 

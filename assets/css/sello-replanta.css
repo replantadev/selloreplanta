@@ -594,25 +594,11 @@ body:has([class*="floating"]) .sello-zindex-auto {
 
 }
 
-/* 2.3: minimal hosting link. */
 
-.replanta-seal-link.sr-minimal-link{color:inherit!important;line-height:1!important;vertical-align:middle}
-
-.sr-minimal-link .sr-plant{display:block;width:30px;height:30px;color:inherit}
-
-.sello-size-small .sr-plant{width:24px;height:24px}.sello-size-large .sr-plant{width:36px;height:36px}
-
-.sr-minimal-text{font:400 12px/1.5 system-ui,sans-serif;letter-spacing:0;color:inherit;overflow-wrap:anywhere}
-
-.sr-minimal-link:focus-visible{outline:1px solid currentColor!important;outline-offset:5px!important}
-
-
-/* 2.3.1: keep the thin SVG visible despite theme sizing and inherited colours. */
-#sello-replanta-container .sr-minimal-link:has(.sr-plant){width:45px!important;height:45px!important;color:#789078!important;opacity:1!important;transition:color .18s ease!important}
-#sello-replanta-container .sr-minimal-link .sr-plant{width:45px!important;height:45px!important;min-width:45px!important;max-width:none!important;display:block!important;visibility:visible!important;opacity:1!important;color:inherit!important;overflow:visible!important}
-#sello-replanta-container .sr-plant path,#sello-replanta-container .sr-plant line{stroke:currentColor!important;fill:none!important;stroke-width:8!important}
-#sello-replanta-container .sr-minimal-link:hover,#sello-replanta-container .sr-minimal-link:focus-visible{color:#269b46!important;opacity:1!important}
-
-/* Proposed caption: the icon remains 45px; the link accommodates both rows. */
-#sello-replanta-container .sr-minimal-link:has(.sr-plant){display:inline-flex!important;flex-direction:column!important;align-items:center!important;gap:5px!important;width:auto!important;height:auto!important;min-width:128px!important;padding:0!important;text-decoration:none!important}
-#sello-replanta-container .sr-forest-caption{display:block!important;font:400 11px/1.35 system-ui,sans-serif!important;letter-spacing:0!important;text-transform:none!important;white-space:nowrap!important;color:inherit!important}
+/* 2.3.3: inline SVG; no icon font, external asset, or :has dependency. */
+#sello-replanta-container .replanta-seal-link.sr-minimal-link{display:inline-flex!important;flex-flow:row nowrap!important;align-items:center!important;justify-content:center!important;gap:7px!important;width:auto!important;height:auto!important;min-width:0!important;min-height:35px!important;padding:0!important;color:#41999f!important;opacity:1!important;visibility:visible!important;text-decoration:none!important;line-height:1!important;transition:color .18s ease!important}
+#sello-replanta-container .sr-minimal-link svg.sr-plant{display:block!important;flex:0 0 35px!important;width:35px!important;height:35px!important;min-width:35px!important;max-width:35px!important;min-height:35px!important;max-height:35px!important;visibility:visible!important;opacity:1!important;color:inherit!important;overflow:visible!important;transform:none!important}
+#sello-replanta-container .sr-plant path,#sello-replanta-container .sr-plant line{stroke:currentColor!important;fill:none!important;stroke-width:8!important;visibility:visible!important;opacity:1!important}
+#sello-replanta-container .sr-forest-caption{display:block!important;flex:0 0 auto!important;font:400 11px/1.35 system-ui,sans-serif!important;letter-spacing:0!important;text-transform:none!important;white-space:nowrap!important;color:inherit!important;margin:0!important;padding:0!important}
+#sello-replanta-container .sr-minimal-link:hover,#sello-replanta-container .sr-minimal-link:focus-visible{color:#269b46!important}
+#sello-replanta-container .sr-minimal-link:focus-visible{outline:2px solid currentColor!important;outline-offset:5px!important}
