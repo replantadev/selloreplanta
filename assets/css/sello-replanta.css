@@ -602,3 +602,6 @@ body:has([class*="floating"]) .sello-zindex-auto {
 #sello-replanta-container .sr-forest-caption{display:block!important;flex:0 0 auto!important;font:400 11px/1.35 system-ui,sans-serif!important;letter-spacing:0!important;text-transform:none!important;white-space:nowrap!important;color:inherit!important;margin:0!important;padding:0!important}
 #sello-replanta-container .sr-minimal-link:hover,#sello-replanta-container .sr-minimal-link:focus-visible{color:#269b46!important}
 #sello-replanta-container .sr-minimal-link:focus-visible{outline:2px solid currentColor!important;outline-offset:5px!important}
+
+/* 2.3.4: neutral caption across customer palettes; icon retains hover color. */
+#sello-replanta-container .sr-forest-caption{color:#767676!important}

@@ -3,7 +3,7 @@ Contributors: replantadev
 Tags: hosting, footer, replanta
 Requires at least: 5.0
 Requires PHP: 7.4
-Stable tag: 2.3.3
+Stable tag: 2.3.4
 License: GPLv2 or later
 
 Enlace al informe de alojamiento y programa de árboles de Replanta.
@@ -12,6 +12,9 @@ Enlace al informe de alojamiento y programa de árboles de Replanta.
 Sauce, Roble y Cedro muestran el icono plant-thin de 35 × 35 px y, a su lado, el texto pequeño «Este sitio web replanta.». El enlace conserva el dominio para consultar su informe en Replanta. El mismo formato se conserva cuando no llega el nombre del plan. El distintivo no es una certificación de neutralidad de carbono.
 
 == Changelog ==
+
+= 2.3.4 =
+* Neutral gray caption to fit customer palettes; 35px inline icon and report link preserved.
 = 2.3.3 =
 * Icono SVG integrado de 35 × 35 px y texto horizontal pequeño.
 * Visibilidad reforzada frente a estilos del tema y hover verde.

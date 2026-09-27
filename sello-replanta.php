@@ -8,7 +8,7 @@
 
  * Description: Identificación del alojamiento Replanta y del plan registrado. Sin certificación ambiental propia.
 
- * Version: 2.3.3
+ * Version: 2.3.4
 
  * Author: Replanta
 
@@ -94,7 +94,7 @@ define('SR_PLUGIN_PATH', plugin_dir_path(__FILE__));
 
 define('SR_PLUGIN_URL', plugin_dir_url(__FILE__));
 
-define('SR_VERSION', '2.3.3');
+define('SR_VERSION', '2.3.4');
 
 
 
