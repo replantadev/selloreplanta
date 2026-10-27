@@ -8,7 +8,7 @@
 
  * Description: Identificación del alojamiento Replanta y del plan registrado. Sin certificación ambiental propia.
 
- * Version: 2.3.4
+ * Version: 2.4.0
 
  * Author: Replanta
 
@@ -66,7 +66,7 @@ add_action('template_redirect', function () {
 
     }
 
-    if (untrailingslashit($path) !== '/web-hosting-ecologico') {
+    if (!in_array(untrailingslashit($path), ['/web-hosting-ecologico', '/huella'], true)) {
 
         return;
 
@@ -80,7 +80,7 @@ add_action('template_redirect', function () {
 
     if ($campaign === 'seal' && in_array($domain, ['replanta.net', 'www.replanta.net'], true)) {
 
-        wp_safe_redirect(home_url('/web-hosting-ecologico/'), 301, 'Sello Replanta canonical cleanup');
+        wp_safe_redirect(home_url('/huella/'), 301, 'Sello Replanta canonical cleanup');
 
         exit;
 
@@ -648,12 +648,33 @@ function sello_replanta_verified_info() {
 
         && strtolower((string)($d['domain']??''))===preg_replace('/^www\./','',$domain);
 
-    $info=['hosted'=>$valid,'cloudflare'=>$valid && ($d['delivery']['provider']??null)==='cloudflare','plan'=>$valid && in_array($d['plan']??'', ['cedro','sauce','roble'],true)?$d['plan']:''];
+    $info=['hosted'=>$valid,'cloudflare'=>$valid && ($d['delivery']['provider']??null)==='cloudflare','plan'=>$valid && in_array($d['plan']??'', ['cedro','sauce','roble'],true)?$d['plan']:'','footer'=>$valid?sello_replanta_footer($d['footer']??null,$domain):null];
 
-    set_transient($key,$info,$valid?15*MINUTE_IN_SECONDS:5*MINUTE_IN_SECONDS);
+    // Sin respuesta de replanta.net se usa el último texto bueno: el pie no cambia ni desaparece por un fallo de red.
+    if (!$valid && is_wp_error($r)) {
+        $last = get_option('sello_replanta_last_info');
+        if (is_array($last)) { set_transient($key,$last,HOUR_IN_SECONDS); return $last; }
+    }
+    if ($valid) update_option('sello_replanta_last_info',$info,false);
+    // Una consulta cada 12 h basta: el texto solo cambia cuando se planta un árbol.
+    set_transient($key,$info,$valid?12*HOUR_IN_SECONDS:HOUR_IN_SECONDS);
 
     return $info;
 
+}
+
+/**
+ * El texto del pie (LR-01, decisión de LJ del 27/10/2026): solo los dos textos aprobados y un enlace a la ficha
+ * pública de replanta.net. Nunca un sello ni un icono. Si el servidor no manda el pie, el texto prudente.
+ */
+function sello_replanta_footer($footer, $domain) {
+    $texts = ['replanta' => 'Este website replanta', 'aloja' => 'Esta web se aloja en Replanta'];
+    $id = is_array($footer) && isset($texts[$footer['texto_id'] ?? '']) ? $footer['texto_id'] : 'aloja';
+    $link = is_array($footer) ? (string)($footer['enlace'] ?? '') : '';
+    if (!preg_match('#^https://replanta\.net/#', $link)) {
+        $link = add_query_arg('dominio', preg_replace('/^www\./', '', $domain), 'https://replanta.net/huella/');
+    }
+    return ['texto' => $texts[$id], 'enlace' => $link];
 }
 
 function verificar_dominio_replanta($domain) {
@@ -788,35 +809,12 @@ function sello_replanta_display_badge()
 
 
 
-    // On replanta.net itself, keep the badge destination canonical. Tracking
+    $footer = sello_replanta_verified_info()['footer'] ?: sello_replanta_footer(null, $domain);
+    // En replanta.net, la ficha canónica sin parámetros (una URL duplicada confunde a los buscadores).
+    $badge_href = preg_match('/(^|\.)replanta\.net$/i', (string) $domain) ? 'https://replanta.net/huella/' : $footer['enlace'];
 
-    // parameters are only useful on customer domains and otherwise create a
-
-    // crawlable duplicate URL that SEO crawlers treat as a separate page.
-
-    $badge_href = 'https://replanta.net/web-hosting-ecologico/';
-
-    if (!preg_match('/(^|\.)replanta\.net$/i', (string) $domain)) {
-
-        $badge_href = add_query_arg([
-
-            'utm_source'   => $domain,
-
-            'utm_medium'   => 'badge',
-
-            'utm_campaign' => 'seal',
-
-            'domain'       => $domain,
-
-        ], $badge_href);
-
-    }
-
-
-
-    $plan = sello_replanta_verified_info()['plan'];
-
-    $minimal_content = '<svg width="35" height="35" class="sr-plant" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M138.54,149.46C106.62,96.25,149.18,43.05,239.63,48.37,245,138.82,191.75,181.38,138.54,149.46Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/><path d="M88.47,160.47c22.8-38-7.6-76-72.21-72.21C12.46,152.87,50.47,183.27,88.47,160.47Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/><line x1="56" y1="128" x2="120" y2="192" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/><path d="M200,88l-61.25,61.25A64,64,0,0,0,120,194.51V224" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/></svg><span class="sr-forest-caption">Este sitio web replanta.</span>';
+    // Solo texto: sin icono ni aspecto de sello (LR-01).
+    $minimal_content = '<span class="sr-forest-caption">' . esc_html($footer['texto']) . '</span>';
 
 
 
@@ -832,7 +830,7 @@ function sello_replanta_display_badge()
 
                    target="_blank" 
 
-                   rel="noopener sponsored" 
+                   rel="noopener" 
 
                    class="replanta-seal-link sr-minimal-link" aria-label="' . esc_attr('Alojamiento de ' . $domain . ' en Replanta') . '">
 
