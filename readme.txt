@@ -3,15 +3,21 @@ Contributors: replantadev
 Tags: hosting, footer, replanta
 Requires at least: 5.0
 Requires PHP: 7.4
-Stable tag: 2.3.4
+Stable tag: 2.4.0
 License: GPLv2 or later
 
 Enlace al informe de alojamiento y programa de árboles de Replanta.
 
 == Description ==
-Sauce, Roble y Cedro muestran el icono plant-thin de 35 × 35 px y, a su lado, el texto pequeño «Este sitio web replanta.». El enlace conserva el dominio para consultar su informe en Replanta. El mismo formato se conserva cuando no llega el nombre del plan. El distintivo no es una certificación de neutralidad de carbono.
+El pie muestra solo texto con enlace, sin icono ni sello: «Este website replanta» cuando el servicio tiene al menos un árbol real plantado con Tree-Nation, y «Esta web se aloja en Replanta» mientras no lo tiene. Lo decide replanta.net y el enlace lleva a la ficha pública del dominio (replanta.net/huella/). No es una certificación ambiental.
 
 == Changelog ==
+
+= 2.4.0 =
+* Pie de solo texto (LR-01): «Este website replanta» solo con un árbol real; si no, «Esta web se aloja en Replanta». Sin icono ni sello.
+* El texto y el enlace los da replanta.net (check_domain → footer); enlace a la ficha /huella/.
+* Se guarda el último texto bueno: un fallo de red no hace desaparecer el pie. Consulta cada 12 h.
+* Fuera las imágenes «carbon negative».
 
 = 2.3.4 =
 * Neutral gray caption to fit customer palettes; 35px inline icon and report link preserved.
